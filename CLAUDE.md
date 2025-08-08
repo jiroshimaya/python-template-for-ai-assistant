@@ -1,7 +1,7 @@
 ---
 title: CLAUDE.md
 created_at: 2025-06-14
-updated_at: 2025-06-20
+updated_at: 2025-08-08
 # このプロパティは、AIエージェントが関連するドキュメントの更新を検知するために必要です。消去しないでください。
 ---
 
@@ -9,13 +9,8 @@ updated_at: 2025-06-20
 
 ## プロジェクト概要
 
-このプロジェクトは、AIエージェントでの開発に最適化されたPythonプロジェクトテンプレートです。
-厳格な型チェック、自動化されたコード品質管理、CIに加えて、GitHub CLIを使用したGitHub操作をサポートします。
-また、AIエージェントとの協働をサポートするためのドキュメントも提供します。
-
-**重要**: プロジェクト初期化時のTODO:
-- [ ] この項目（「プロジェクト概要」セクション）をプロジェクトに特化したものに更新
-- [ ] このTODOを削除する
+実際のプロジェクトの内容に適したものに適宜更新してください
+例: 適度な型チェック、自動化されたコード品質管理、CI/CDを備えたPython 3.12+プロジェクトテンプレート。
 
 ## 技術スタック
 
@@ -23,7 +18,7 @@ updated_at: 2025-06-20
 - **主要ツール**: uv (パッケージ管理), Ruff (リント・フォーマット), mypy (型チェック), pytest (テスト)
 - **パッケージ管理**: uv
 - **リンター/フォーマッター**: ruff
-- **型チェッカー**: mypy (strict mode + PEP 695対応)
+- **型チェッカー**: pyright
 - **テストフレームワーク**: pytest
 - **自動化**: pre-commit, GitHub Actions
 
@@ -31,60 +26,59 @@ updated_at: 2025-06-20
 
 ```
 project-root/
-├── .github/                     # GitHub Actionsの設定ファイル
-│   ├── workflows/               # CI/CD + ベンチマークワークフロー
-│   │   └── ci.yml               # メインCI（テスト・リント・型チェック）
-│   ├── dependabot.yml           # Dependabotの設定
-│   ├── ISSUE_TEMPLATE/          # Issueテンプレート
-│   └── PULL_REQUEST_TEMPLATE.md # Pull Requestテンプレート
-├── template/                    # **重要**: AIエージェントのベストプラクティス・モデルコード
+├── .github/
+│   ├── copilot
+│   ├── workflows/
+│   │   └── ci.yml
+│   ├── dependabot.yml
+│   ├── ISSUE_TEMPLATE/
+│   └── PULL_REQUEST_TEMPLATE.md
+├── template/
 │   ├── src/
 │   │   └── template_package/    # モデルパッケージの完全な実装例
 │   │       ├── __init__.py      # パッケージエクスポートの例
 │   │       ├── py.typed         # 型情報マーカーの例
-│   │       ├── schemas.py         # スキーマ定義のベストプラクティス
+│   │       ├── types.py         # 型定義のベストプラクティス
 │   │       ├── core/
 │   │       │   └── example.py   # クラス・関数実装の模範例
 │   │       └── utils/
 │   │           ├── helpers.py   # ユーティリティ関数の実装例
 │   │           ├── logging_config.py # ロギング設定の実装例
 │   │           └── profiling.py # パフォーマンス測定の実装例
-│   └── tests/                   # テストコードの完全な実装例
-│       ├── unit/                # 単体テストの例
-│       │   ├── test_example.py  # クラステストの例
-│       │   ├── test_helpers.py  # 関数テストの例
-│       │   └── test_logging.py  # ロギングテストの例
-│       ├── property/            # プロパティベーステストの例
-│       │   └── test_helpers_property.py
-│       ├── integration/         # 結合テストの例
-│       │   └── test_example.py
-│       └── conftest.py          # pytestフィクスチャの例
+│   ├── tests/                   # テストコードの完全な実装例
+│   │   ├── unit/                # 単体テスト
+│   │   ├── integration/         # 結合テスト
+│   │   └── conftest.py          # pytestフィクスチャ
+│   └── manual_tests/            # APIを実際に叩くなどのテストは本ディレクトリに実装する
+│       ├── unit/                # 単体テスト
+│       ├── integration/         # 結合テスト
+│       └── conftest.py          # pytestフィクスチャ
 ├── src/                         # 実際の開発用ディレクトリ
-│       └── project_name/    # モデルパッケージの完全な実装例
+│       └── project_name/
 │           └── （プロジェクト固有のパッケージを配置）
 ├── tests/                       # 実際のテスト用ディレクトリ
-│   ├── unit/                    # 単体テスト
-│   ├── integration/             # 統合テスト
-│   └── conftest.py              # pytest設定
+│   ├── unit/
+│   ├── integration/
+│   └── conftest.py
 ├── docs/                        # ドキュメント
-├── scripts/                     # ユーティリティスクリプト
-├── pyproject.toml               # uv/ruff/mypyの設定ファイル
-├── .gitignore                   # バージョン管理除外ファイル
-├── .pre-commit-config.yaml      # pre-commitの設定ファイル
-├── README.md                    # 人間向けのプロジェクトの説明
-└── CLAUDE.md                    # このファイル
+├── scripts/
+├── pyproject.toml
+├── .gitignore
+├── .pre-commit-config.yaml
+├── README.md
+└── CLAUDE.md
 ```
 
 ## 実装時の必須要件
 
 **重要**: コードを書く際は、必ず以下のすべてを遵守してください：
 
-### 0. 開発環境を確認して活用する
 
-- 開発環境はuvで管理されています。すべてのPythonコマンドに `uv run` を前置し、新しい依存関係は `uv add` で追加してください。
-- GitHub CLIがインストールされています。GitHub操作は `gh` コマンドを使用してください。
-- pre-commitフックが設定されているほか、mypyやruff、pytestなどの厳格なガードレールが整備されています。こまめにチェックやフォーマットを実行し、コード品質を保証してください。
-- 「よく使うコマンド」セクションにあるコマンド集は、この開発環境での開発を支援するためのコマンドが揃っています。積極的に活用してください。
+### 0. 開発環境
+- **パッケージ管理**: uvで環境を統一管理。Pythonコマンドは必ず `uv run` を前置
+- **依存関係追加**: `uv add` (通常) / `uv add --dev` (開発用)
+- **GitHub操作**: `gh`コマンド
+- **品質保証**: pre-commitフック設定済み。`uv run task check-all` で包括的チェック
 
 ### 1. コード品質を保証する
 
@@ -98,53 +92,41 @@ project-root/
 - `uv run pytest PATH`: テスト実行
 - まとめて実行: `uv run task check`（format → lint → typecheck → test）
 
-### 2. テストを実装する
+### 1-5. 実装フロー
+1. **品質**: format→lint→typecheck→test
+2. **テスト**: 新機能::TDD必須
+3. **ロギング**: 全コード::ログ必須
+4. **性能**: 重い処理→プロファイル
+5. **段階的**: Protocol»テスト»実装»最適化
 
-**テスト実装のベストプラクティスは「テスト戦略」セクションを参照してください。**
+### 6. 効率化テクニック
 
-新機能には必ず対応するテストを作成してください。
+#### コミュニケーション記法
+```yaml
+→: "処理フロー"      # analyze→fix→test
+|: "選択/区切り"     # option1|option2
+&: "並列/結合"       # task1 & task2
+::: "定義"           # variable :: value
+»: "シーケンス"      # step1 » step2
+@: "参照/場所"       # @file:line
+```
 
-### 3. 適切なロギングを行う
+#### エラーリカバリー
+- **リトライ**: max3回 & 指数バックオフ
+- **フォールバック**: 高速→確実
+- **状態復元**: チェックポイント»ロールバック|正常状態»再開|失敗のみ»再実行
 
-**ロギングのベストプラクティスは「ロギング戦略」セクションを参照してください。**
+## template/ディレクトリの活用
 
-このプロジェクトでは、すべてのコードに実行時のロギングを実装することを必須とします。これにより、開発・デバッグ時の問題追跡が容易になります。
-
-### 4. パフォーマンスを測定する
-
-**パフォーマンス測定のベストプラクティスは「パフォーマンス測定とベンチマーク」セクションを参照してください。**
-
-重い処理を含む関数には適宜プロファイリングを実装し、パフォーマンスを測定することで実装のボトルネックが発見しやすいようにしてください。
-
-### 5. 段階的実装アプローチを行う
-
-- **インターフェース設計**: まずProtocolやABCでインターフェースを定義
-- **テストファースト**: 実装前にテストを作成
-- **段階的実装**: 最小限の実装→リファクタリング→最適化の順序
-
-## `template/`ディレクトリにあるモデルケースの参照
-
-@template/ ディレクトリには、Python開発のベストプラクティスを示すモデルコードが含まれています。実装時の参考として積極的に活用してください。
-
-### モデルコード参照の推奨場面
-
-1. **新しいクラスや関数を実装する際**
-   - @template/src/project_name/core/example.py で適切な型ヒント、docstring、エラーハンドリングを確認
-   - @template/src/project_name/schemas.py で型定義のパターンを確認
-
-2. **ユーティリティ関数を作成する際**
-   - @template/src/project_name/utils/helpers.py で関数の構造、エラー処理、ロギングを確認
-
-3. **テストを書く際**
-   - @template/tests/unit/ で単体テストの書き方を確認
-   - @template/tests/conftest.py でフィクスチャの実装例を確認
-
-4. **ロギングを実装する際**
-   - @template/src/project_name/utils/logging_config.py で設定例を確認
-   - 各モジュールでのロガー使用例を確認
-
-新しいコードを書く際は、まず`template/`内の類似例を確認し、パターンを踏襲し、プロジェクト固有の要件に合わせて調整してください。
-`template/`は削除せず、常に参照可能な状態を維持します。
+実装前に必ず参照:
+- **クラス/関数**: @template/src/template_package/core/example.py (型ヒント|docstring|エラー処理)
+- **型定義**: @template/src/template_package/types.py
+- **ユーティリティ**: @template/src/template_package/utils/helpers.py
+- **テスト**: @template/tests/{unit|property|integration}/
+- **フィクスチャ**: @template/tests/conftest.py
+- **ロギング**: @template/src/template_package/utils/logging_config.py
+実装時: template/内の類似例確認»パターン踏襲»プロジェクト調整
+注: template/は変更&削除禁止
 
 ## よく使うコマンド
 
@@ -160,7 +142,7 @@ uv run pytest PATH          # 指定したパスのテストを実行
 # コード品質チェック
 uv run ruff format PATH      # コードフォーマット
 uv run ruff check PATH --fix  # リントチェック（自動修正付き）
-uv run mypy PATH --strict    # 型チェック（strict mode）
+uv run pyright PATH --strict    # 型チェック（strict mode）
 uv run bandit -r src/        # セキュリティチェック（bandit）
 uv run pip-audit             # 依存関係の脆弱性チェック（pip-audit）
 
@@ -205,251 +187,139 @@ src/
 ...
 ```
 
+## Git規則
+
+**ブランチ**: feature/ | fix/ | docs/ | test/
+**ラベル**: enhancement | bug | documentation | test
+## コーディング規約
+
+### ディレクトリ構成
+
+パッケージとテストは `template/` 内の構造を踏襲、コアロジックは必ず `src/project_name` 内に配置
+
+```
+src/
+├── project_name/
+│   ├── core/
+│   ├── utils/
+│   ├── __init__.py
+│   └── ...
+├── tests/
+│   ├── unit/
+│   ├── property/
+│   ├── integration/
+│   └── conftest.py
+├── manual_tests/
+├── docs/
+...
+```
+
 ### Python コーディングスタイル
+- 型ヒント: Python 3.12+スタイル必須（pyright + PEP 695）
+- Docstring: Google Docs形式
+- 命名: クラス(PascalCase)、関数(snake_case)、定数(UPPER_SNAKE)、プライベート(_prefix)
+- ベストプラクティス: @template/src/template_package/types.py
 
-- **型ヒント**: Python 3.12+ の型ヒントを必ず使用（mypy strict mode + PEP 695準拠）
-- **Docstring**: NumPy形式のDocstringを使用
-- **命名規則**:
-  - クラス: PascalCase
-  - 関数/変数: snake_case
-  - 定数: UPPER_SNAKE_CASE
-  - プライベート: 先頭に `_`
-- **インポート順序**: 標準ライブラリ → サードパーティ → ローカル（ruffが自動整理）
+### エラーメッセージ
 
-### 型ヒントのベストプラクティス
-
-@template/src/template_package/schemas.py を参照してください。
-
-### エラーメッセージの原則
-
-#### 1. 具体的で実用的
-```python
-# Bad
-raise ValueError("Invalid input")
-
-# Good
-raise ValueError(
-    f"Expected positive integer for 'count', got {count}. "
-    f"Please provide a value greater than 0."
-)
-```
-
-#### 2. コンテキストを提供
-```python
-try:
-    result = process_data(data)
-except ProcessingError as e:
-    raise ProcessingError(
-        f"Failed to process data from {source_file}: {e}"
-    ) from e
-```
-
-#### 3. 解決策を提示
-```python
-if not config_file.exists():
-    raise FileNotFoundError(
-        f"Configuration file not found at {config_file}. "
-        f"Create one by running: python -m {__package__}.init_config"
-    )
-```
+1. **具体的**: "Invalid input" → "Expected positive integer, got {count}"
+2. **コンテキスト付き**: "Failed to process {source_file}: {e}"
+3. **解決策を提示**: "Not found. Create by: python -m {__package__}.init"
 
 ### アンカーコメント
-
-疑問点や改善点がある場合は、アンカーコメントを活用してください。
-
 ```python
-# AIDEV-NOTE: このクラスは外部APIとの統合専用
-# AIDEV-TODO: パフォーマンス最適化が必要（レスポンス時間>500ms）
-# AIDEV-QUESTION: この実装でメモリリークの可能性は？
+# AIDEV-NOTE: 説明
+# AIDEV-TODO: 課題
+# AIDEV-QUESTION: 疑問
 ```
 
-## テスト戦略
+## テスト戦略（TDD）
 
-詳細は @template/tests/ にある実装を適宜参照してください。
+t-wada流のテスト駆動開発（TDD）を徹底
 
-### テストの種類
+### サイクル
+🔴 Red » 🟢 Green » 🔵 Refactor
 
-1. **単体テスト** ( @template/tests/unit/test_example.py などを参照 )
-   - 関数・クラスの基本動作をテスト
-   - 正常系・異常系・エッジケースもカバーする
+### 手順
+1. TODO作成
+2. 失敗テスト
+3. 最小実装（仮実装OK）
+4. リファクタ
 
-2. **統合テスト** ( @template/tests/integration/test_example.py などを参照 )
-   - コンポーネント間の連携
+### 原則
+- 小さなステップで進める
+- 三角測量で一般化
+- 不安な部分から着手
+- テストリストを常に更新
 
-### テスト命名規約
-
+#### 三角測量の例
 ```python
-# 日本語で意図を明確に
-# ソース関数に対応したクラスを作成し、メソッドでケースごとのテストを実装する
-class TestExample:
-    def test_正常系_有効なデータで処理成功(self):
-        """chunk_listが正しくチャンク化できることを確認。"""
+# 1. 仮実装: return 5
+assert add(2, 3) == 5
 
-    def test_異常系_不正なサイズでValueError(self):
-        """チャンクサイズが0以下の場合、ValueErrorが発生することを確認。"""
+# 2. 一般化: return a + b
+assert add(10, 20) == 30
 
-    def test_エッジケース_空リストで空結果(self):
-        """空のリストをチャンク化すると空の結果が返されることを確認。"""
+# 3. エッジケース確認
+assert add(-1, -2) == -3
 ```
 
-## ロギング戦略
+#### 注意点
+- 1test::1behavior
+- Red»Greenでコミット
+- 日本語テスト名推奨
+- リファクタ: 重複|可読性|SOLID違反時
 
-### ロギング実装の必須要件
+### テスト種別
+1. **単体**: 基本動作 `template/tests/unit/`
+3. **統合**: 連携テスト `template/tests/integration/`
 
-**TL;DR**
+### テスト命名
+- 1関数1クラス。`class TestFunctionName`
+- メソッドでケースごとのテスト。`def test_[正常系|異常系|エッジケース]_条件で結果()`
 
-1. **各モジュールの冒頭で必ずロガーを実装**
-2. **関数・メソッドの開始と終了時にログを出力**
-3. **エラー処理時にログを出力し、exc_info=Trueを付けることでエラーの原因を追跡できるようにする**
-4. **ログレベルの使い分け**
-    - **DEBUG**: 詳細な実行フロー、引数、戻り値
-    - **INFO**: 重要な処理の完了、状態変更
-    - **WARNING**: 異常ではないが注意が必要な状況
-    - **ERROR**: エラー発生時（必ずexc_info=Trueを付ける）
+## ロギング
 
-詳細は @template/src/template_package/utils/logging_config.py や @template/src/template_package にある実装を適宜参照してください。
+### 必須要件
+1. モジュール冒頭::ロガー定義
+2. 関数開始&終了::ログ出力
+3. エラー時::exc_info=True
+4. レベル: DEBUG|INFO|WARNING|ERROR
 
-### 開発時のロギング設定
+ベストプラクティス: @template/src/template_package/utils/logging_config.py & @template/src/template_package/core/example.py
 
+### 設定
 ```python
-# コード実装時は必ずINFOモード、デバッグ時はDEBUGモードで開発
-from project_name import setup_logging
 setup_logging(level="INFO")
-
-# または環境変数で設定
-export LOG_LEVEL=INFO
+# または export LOG_LEVEL=INFO
 ```
 
 ### テスト時の設定
+```bash
+# 環境変数でテスト時のログレベル制御
+export TEST_LOG_LEVEL=INFO  # デフォルトはDEBUG
+```
 
 ```python
-# テスト実行時のログレベル制御
-export TEST_LOG_LEVEL=INFO  # デフォルトはDEBUG
-
-# 個別のテストでログレベルを変更
-def test_with_custom_log_level(set_test_log_level):
+# 個別テストでログレベル変更
+def test_カスタムログレベル(set_test_log_level):
     set_test_log_level("WARNING")
     # テスト実行
 ```
 
-## GitHub操作
 
-AIエージェントは `gh` コマンドを使用してGitHub操作を行うことができます。
+ベストプラクティス: @template/src/template_package/utils/profiling.py
 
-### プルリクエスト作成
+## 更新トリガー
 
-#### ブランチ名の命名規則
+- 仕様/依存関係/構造/規約の変更時
+- 同一質問2回以上 → FAQ追加
+- エラーパターン2回以上 → トラブルシューティング追加
 
-- 機能追加: `feature/...`
-- バグ修正: `fix/...`
-- ドキュメント更新: `docs/...`
-- テスト: `test/...`
+## トラブルシューティング/FAQ
 
-#### ラベル名の命名規則
+適宜更新
 
-- 機能追加: `enhancement`
-- バグ修正: `bug`
-- ドキュメント更新: `documentation`
-- テスト: `test`
+## カスタムガイド
 
-#### コマンドの例
-
-```bash
-# ghコマンドを使用したPR作成
-gh pr create --title "機能追加" --body "新しい機能を実装しました" --label "enhancement"
-gh pr create --title "認証エラー修正" --body "ログイン時の500エラーを修正" --label "bug"
-gh pr create --title "ドキュメント更新" --body "READMEを更新しました" --label "documentation"
-
-# ラベルなしでPR作成
-gh pr create --title "リファクタリング" --body "コードの可読性を向上させました"
-
-# ドラフトPRの作成
-gh pr create --draft --title "WIP: Working on feature" --body "Description of changes"
-```
-
-### イシュー管理
-
-```bash
-# ghコマンドを使用したイシューの作成
-gh issue create --title "認証の不具合" --body "ログイン時にエラーが発生します" --label "bug"
-gh issue create --title "新機能の提案" --body "〜の機能があると便利です" --label "enhancement"
-gh issue create --title "AIエージェント改善" --body "〜の部分で改善が必要です" --label "documentation"
-gh issue create --title "質問" --body "〜について教えてください" --label "question"
-
-# ラベルなしでイシュー作成
-gh issue create --title "一般的な改善提案" --body "〜を改善してはどうでしょうか"
-
-# イシューの一覧表示
-gh issue list
-
-# イシューの詳細表示
-gh issue view 123
-```
-
-## 指示ファイル自動更新トリガー
-
-**重要**: 以下の状況でAIエージェントへの指示ファイルの更新を検討してください：
-
-### 変更ベースのトリガー
-- 仕様の追加・変更があった場合
-- 新しい依存関係の追加時
-- プロジェクト構造の変更
-- コーディング規約の更新
-
-### 頻度ベースのトリガー
-
-- **同じ質問が2回以上発生** → 即座にFAQとして追加
-- **新しいエラーパターンを2回以上確認** → トラブルシューティングに追加
-
-## トラブルシューティング
-
-### pre-commitが失敗する場合
-
-```bash
-# キャッシュをクリア
-uv run pre-commit clean
-uv run pre-commit gc
-
-# 再インストール
-uv run pre-commit uninstall
-uv run pre-commit install
-```
-
-### ...随時追記してください...
-
-## FAQ
-
-### ...随時追記してください...
-
-## 詳細ガイドの参照
-
-以下の専用ガイドを必要に応じてインポートしてください。
-
-#### 機械学習プロジェクト
-
-機械学習プロジェクトの場合、@docs/ml-project-guide.md をインポートしてください。
-
-このガイドには以下が含まれます：
-- PyTorch, numpy, pandas の設定
-- Weights & Biases (wandb) の統合手順
-- Hydra による設定管理
-- GPU環境の最適化
-- 実験管理のベストプラクティス
-- データバージョニング戦略
-
-#### バックエンドAPI プロジェクト
-
-FastAPI を使用したバックエンドプロジェクトの場合、@docs/backend-project-guide.md をインポートしてください。
-
-このガイドには以下が含まれます：
-- FastAPI + Pydantic の設定
-- SQLAlchemy による非同期データベース操作
-- JWT認証とセキュリティ設定
-- API設計のベストプラクティス
-- Docker開発環境
-- プロダクション考慮事項
-
-### カスタムガイドの追加
-
-プロジェクト固有の要件に応じて、追加のガイドを`docs/` ディレクトリに作成できます。
-例: フロントエンドプロジェクトのガイド(`docs/frontend-project-guide.md`), チーム固有のルール(`docs/team-specific-guide.md`)など
+`docs/`に追加可能。追加時はCLAUDE.mdに概要記載必須。
