@@ -16,7 +16,7 @@ from structlog.contextvars import (
     unbind_contextvars,
 )
 
-from ..types import LogFormat, LogLevel
+from ..schemas import LogFormat, LogLevel
 
 
 class LoggerProtocol(Protocol):
