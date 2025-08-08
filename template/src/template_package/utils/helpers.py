@@ -5,7 +5,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, TypeVar
 
-from ..types import JSONObject, JSONValue
+from ..schemas import JSONObject, JSONValue
 
 T = TypeVar("T")
 
