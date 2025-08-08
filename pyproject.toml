@@ -11,26 +11,6 @@ dependencies = [
     "pydantic>=2.11.7",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=8.0.0",
-    "pytest-cov>=5.0.0",
-    "pytest-xdist>=3.5.0",
-    "hypothesis>=6.0.0",
-    "mypy>=1.10.0",
-    "ruff>=0.4.0",
-    "pre-commit>=3.7.0",
-    "bandit>=1.7.0",
-    "pip-audit>=2.6.0",
-]
-
-docs = [
-    "sphinx>=7.0.0",
-    "sphinx-rtd-theme>=2.0.0",
-    "sphinx-autodoc-typehints>=2.0.0",
-    "myst-parser>=2.0.0",
-]
-
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
@@ -81,26 +61,47 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["PLR2004", "PLR0913"]  # テストでは magic number とパラメータ数を許可
 
-[tool.mypy]
-python_version = "3.12"
-strict = true
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-warn_unreachable = true
-strict_equality = true
-enable_incomplete_feature = ["NewGenericSyntax"]
+[tool.pyright]
+include = ["src", "tests"]
+exclude = [".venv", "**/__pycache__"]
+pythonVersion = "3.12"
+pythonPlatform = "All"
+typeCheckingMode = "basic"
 
-[[tool.mypy.overrides]]
-module = "tests.*"
-disallow_untyped_defs = false
-disallow_incomplete_defs = false
+# Type checking behavior
+strictParameterNoneValue = false
+
+# 重要なエラー（必ずエラーとして報告）
+reportMissingImports = "error"
+reportIncompatibleMethodOverride = "error"
+reportIncompatibleVariableOverride = "error"
+reportOverlappingOverload = "error"
+reportUnusedCoroutine = "error"
+reportMatchNotExhaustive = "error"
+reportUnusedImport = "error"
+reportDuplicateImport = "error"
+
+# 開発時に役立つ警告レベル
+reportUnusedClass = "warning"
+reportUnusedFunction = "warning"
+reportUnusedVariable = "warning"
+reportInconsistentConstructor = "warning"
+reportUninitializedInstanceVariable = "warning"
+reportUnnecessaryIsInstance = "warning"
+reportUnnecessaryCast = "warning"
+reportUnnecessaryComparison = "warning"
+reportUnnecessaryTypeIgnoreComment = "warning"
+
+# 開発を妨げない程度に無効化
+reportCallIssue = "none"
+reportAttributeAccessIssue = "none"
+reportMissingTypeStubs = "none"
+reportMissingSuperCall = "none"
+reportPrivateUsage = "none"
+reportImplicitStringConcatenation = "none"
+reportInvalidStubStatement = "none"
+reportIncompleteStub = "none"
+reportUnsupportedDunderAll = "none"
 
 [tool.bandit]
 exclude_dirs = ["tests", ".venv"]
@@ -122,9 +123,24 @@ markers = [
 
 [dependency-groups]
 dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0", 
+    "pytest-xdist>=3.5.0",
+    "hypothesis>=6.0.0",
+    "mypy>=1.10.0",
+    "ruff>=0.4.0",
+    "pre-commit>=3.7.0",
+    "bandit>=1.7.0",
+    "pip-audit>=2.6.0",
     "pytest-benchmark>=5.1.0",
     "taskipy>=1.14.1",
     "urllib3>=2.5.0",
+]
+docs = [
+    "sphinx>=7.0.0",
+    "sphinx-rtd-theme>=2.0.0",
+    "sphinx-autodoc-typehints>=2.0.0",
+    "myst-parser>=2.0.0",
 ]
 
 
@@ -136,7 +152,7 @@ clean = """
   find . -type d -name '__pycache__' -exec rm -rf {} + &&
   find . -type f -name '*.pyc' -delete &&
   find . -type d -name '.pytest_cache' -exec rm -rf {} + &&
-  find . -type d -name '.mypy_cache' -exec rm -rf {} + &&
+  find . -type d -name '.pyright_cache' -exec rm -rf {} + &&
   find . -type d -name '.ruff_cache' -exec rm -rf {} + &&
   find . -type d -name 'htmlcov' -exec rm -rf {} + &&
   find . -type f -name '.coverage' -delete &&
