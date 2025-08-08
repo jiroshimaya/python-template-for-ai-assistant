@@ -68,15 +68,6 @@ jobs:
       run: |
         uv run pytest tests
 
-    # オプション: カバレッジレポートのアップロード
-    # - name: Upload coverage reports
-    #   uses: codecov/codecov-action@v4
-    #   with:
-    #     file: ./coverage.xml
-    #     flags: unittests
-    #     name: ${{ matrix.os }}-${{ matrix.python-version }}
-    #     fail_ci_if_error: false  # カバレッジサービスの問題でCIを失敗させない
-
   # オプション: パッケージのビルド
   # build:
   #   name: Build Distribution
