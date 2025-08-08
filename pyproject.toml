@@ -143,10 +143,10 @@ clean = """
   rm -rf dist build
 """
 help = "echo '利用可能なタスク: clean, check, help (task [name] で実行)'"
-check = """
+check-all = """
   ARGS="${args:-.}"
   uv run ruff format $ARGS &&
   uv run ruff check $ARGS --fix &&
-  uv run mypy $ARGS --strict &&
+  uv run pyright $ARGS --strict &&
   uv run pytest $ARGS
 """
