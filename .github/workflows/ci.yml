@@ -7,8 +7,8 @@ on:
     branches: [main]
     types: [opened, synchronize, reopened]
   # 毎週月曜日の朝に定期実行
-  schedule:
-    - cron: '0 0 * * 1'
+  #schedule:
+  #  - cron: '0 0 * * 1'
   # 手動実行を許可
   workflow_dispatch:
 
