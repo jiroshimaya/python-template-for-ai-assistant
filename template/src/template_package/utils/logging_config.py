@@ -100,7 +100,7 @@ def add_log_level_upper(_: Any, __: Any, event_dict: dict[str, Any]) -> dict[str
     return event_dict
 
 
-def setup_logging(  # noqa: PLR0913
+def setup_logging(
     *,
     level: LogLevel | str = "INFO",
     format: LogFormat = "console",

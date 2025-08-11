@@ -1,6 +1,7 @@
 """Pydanticモデルによるスキーマ定義。"""
 
 from typing import Literal
+
 from pydantic import BaseModel, Field
 
 # Status types
@@ -75,7 +76,9 @@ class LogContextSchema(BaseModel):
 class LogEventSchema(BaseModel):
     """構造化ログイベント"""
     event: str = Field(..., description="イベント名")
-    level: Literal["debug", "info", "warning", "error", "critical"] = Field(..., description="ログレベル")
+    level: Literal["debug", "info", "warning", "error", "critical"] = Field(
+        ..., description="ログレベル"
+    )
     timestamp: str = Field(..., description="タイムスタンプ")
     logger: str = Field(..., description="ロガー名")
     context: LogContextSchema | None = Field(None, description="ログコンテキスト")
