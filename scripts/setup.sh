@@ -140,7 +140,7 @@ update_project_name() {
 
     # Use the Python script if it exists
     if [ -f "scripts/update_project_name.py" ]; then
-        python scripts/update_project_name.py "$PROJECT_NAME"
+        uv run scripts/update_project_name.py "$PROJECT_NAME"
     else
         # Fallback to manual replacement
         # Update in specific files
