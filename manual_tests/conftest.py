@@ -9,6 +9,7 @@ from typing import Any
 
 import pytest
 
+
 @pytest.fixture
 def sample_data() -> list[dict[str, Any]]:
     """Create sample data for testing."""
@@ -29,7 +30,6 @@ def temp_dir() -> Iterator[Path]:
 @pytest.fixture(autouse=True)
 def reset_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     """Reset environment variables for each test."""
-    # Remove any test-specific environment variables
     test_env_vars = [var for var in os.environ if var.startswith("TEST_")]
     for var in test_env_vars:
         monkeypatch.delenv(var, raising=False)
@@ -37,14 +37,11 @@ def reset_environment(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.fixture(scope="session")
 def setup_test_logging() -> None:
-    """Setup basic logging for test session."""
-    # テスト中は標準ライブラリのロギングを使用
-    import logging
-
-    log_level = os.environ.get("TEST_LOG_LEVEL", "INFO")
+    """Setup logging for test session with DEBUG level by default."""
+    log_level = os.environ.get("TEST_LOG_LEVEL", "DEBUG")
     logging.basicConfig(
-        level=getattr(logging, log_level),
-        format="[%(levelname)s] %(name)s: %(message)s",
+        level=getattr(logging, log_level, logging.DEBUG),
+        format="[%(asctime)s] [%(levelname)8s] [%(name)s] %(message)s",
         force=True,
     )
 
@@ -52,32 +49,15 @@ def setup_test_logging() -> None:
 @pytest.fixture
 def capture_logs(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture:
     """Capture logs for testing with proper level."""
-    # テスト用にログレベルを設定
     caplog.set_level(logging.DEBUG)
     return caplog
 
 
-@pytest.fixture
-def set_test_log_level():
-    """Fixture to dynamically set log level in tests."""
-
-    def _set_level(level: str | int) -> None:
-        set_log_level(level)
-
-    return _set_level
-
-
-# pytestの起動時にロギングを設定
 def pytest_configure(config: pytest.Config) -> None:
-    """Configure pytest with structured logging setup."""
-    # テスト実行時の最小限のログ設定
-    log_level = os.environ.get("TEST_LOG_LEVEL", "INFO")  # DEBUGだと詳細すぎる
-
-    # 標準ライブラリのロギングのみを使用（structlogの問題を回避）
-    import logging
-
+    """Configure pytest with logging setup."""
+    log_level = os.environ.get("TEST_LOG_LEVEL", "DEBUG")
     logging.basicConfig(
-        level=getattr(logging, log_level),
-        format="[%(levelname)s] %(name)s: %(message)s",
+        level=getattr(logging, log_level, logging.DEBUG),
+        format="[%(asctime)s] [%(levelname)8s] [%(name)s] %(message)s",
         force=True,
     )
