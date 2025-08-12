@@ -9,24 +9,6 @@ from typing import Any
 
 import pytest
 
-from project_name.core.example import ExampleClass, ExampleConfig
-
-
-@pytest.fixture
-def example_config() -> ExampleConfig:
-    """Create a test configuration."""
-    return ExampleConfig(
-        name="test",
-        max_items=10,
-        enable_validation=True,
-    )
-
-
-@pytest.fixture
-def example_instance(example_config: ExampleConfig) -> ExampleClass:
-    """Create a test ExampleClass instance."""
-    return ExampleClass(example_config)
-
 
 @pytest.fixture
 def sample_data() -> list[dict[str, Any]]:

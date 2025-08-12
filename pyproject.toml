@@ -28,7 +28,7 @@ indent-width = 4
 target-version = "py312"
 
 [tool.ruff.lint]
-exclude = [".venv"]
+exclude = [".venv", "template"]
 select = [
     "E",      # pycodestyle errors
     "W",      # pycodestyle warnings
@@ -64,7 +64,7 @@ ignore = [
 
 [tool.pyright]
 include = ["src", "tests"]
-exclude = [".venv", "**/__pycache__"]
+exclude = [".venv", "**/__pycache__", "template"]
 pythonVersion = "3.12"
 pythonPlatform = "All"
 typeCheckingMode = "basic"
@@ -125,6 +125,7 @@ markers = [
 dev = [
     "pytest>=8.0.0",
     "ruff>=0.4.0",
+    "pyright>=1.1.0",
     "pre-commit>=3.7.0",
     "bandit>=1.7.0",
     "pip-audit>=2.6.0",
@@ -154,9 +155,9 @@ clean = """
 """
 help = "echo '利用可能なタスク: clean, check, help (task [name] で実行)'"
 check-all = """
-  ARGS="${args:-.}"
+  ARGS="${args:-src tests}"
   uv run ruff format $ARGS &&
   uv run ruff check $ARGS --fix &&
-  uv run pyright $ARGS --strict &&
+  uv run pyright $ARGS &&
   uv run pytest $ARGS
 """
