@@ -35,7 +35,7 @@ project-root/
 │   │   └── template_package/    # モデルパッケージの完全な実装例
 │   │       ├── __init__.py      # パッケージエクスポートの例
 │   │       ├── py.typed         # 型情報マーカーの例
-│   │       ├── types.py         # 型定義のベストプラクティス
+│   │       ├── schemas.py         # 型定義のベストプラクティス
 │   │       ├── core/
 │   │       │   └── example.py   # クラス・関数実装の模範例
 │   │       └── utils/
@@ -117,7 +117,7 @@ project-root/
 
 実装前に必ず参照:
 - **クラス/関数**: @template/src/template_package/core/example.py (型ヒント|docstring|エラー処理)
-- **型定義**: @template/src/template_package/types.py
+- **型定義**: @template/src/template_package/schemas.py
 - **ユーティリティ**: @template/src/template_package/utils/helpers.py
 - **テスト**: @template/tests/{unit|property|integration}/
 - **フィクスチャ**: @template/tests/conftest.py
@@ -215,7 +215,7 @@ src/
 - 型ヒント: Python 3.12+スタイル必須（pyright + PEP 695）
 - Docstring: Google Docs形式
 - 命名: クラス(PascalCase)、関数(snake_case)、定数(UPPER_SNAKE)、プライベート(_prefix)
-- ベストプラクティス: @template/src/template_package/types.py
+- ベストプラクティス: @template/src/template_package/schemas.py
 
 ### エラーメッセージ
 
