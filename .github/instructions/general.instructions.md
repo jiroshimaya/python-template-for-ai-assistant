@@ -19,53 +19,6 @@ applyTo: "**"
 - **テストフレームワーク**: pytest
 - **自動化**: pre-commit, GitHub Actions
 
-## プロジェクト全体の構造(デフォルト。必要に応じて更新してください)
-
-```
-project-root/
-├── .github/
-│   ├── copilot
-│   ├── workflows/
-│   │   └── ci.yml
-│   ├── dependabot.yml
-│   ├── ISSUE_TEMPLATE/
-│   └── PULL_REQUEST_TEMPLATE.md
-├── template/
-│   ├── src/
-│   │   └── template_package/    # モデルパッケージの完全な実装例
-│   │       ├── __init__.py      # パッケージエクスポートの例
-│   │       ├── py.typed         # 型情報マーカーの例
-│   │       ├── schemas.py         # 型定義のベストプラクティス
-│   │       ├── core/
-│   │       │   └── example.py   # クラス・関数実装の模範例
-│   │       └── utils/
-│   │           ├── helpers.py   # ユーティリティ関数の実装例
-│   │           ├── logging_config.py # ロギング設定の実装例
-│   │           └── profiling.py # パフォーマンス測定の実装例
-│   ├── tests/                   # テストコードの完全な実装例
-│   │   ├── unit/                # 単体テスト
-│   │   ├── integration/         # 結合テスト
-│   │   └── conftest.py          # pytestフィクスチャ
-│   └── manual_tests/            # APIを実際に叩くなどのテストは本ディレクトリに実装する
-│       ├── unit/                # 単体テスト
-│       ├── integration/         # 結合テスト
-│       └── conftest.py          # pytestフィクスチャ
-├── src/                         # 実際の開発用ディレクトリ
-│       └── project_name/
-│           └── （プロジェクト固有のパッケージを配置）
-├── tests/                       # 実際のテスト用ディレクトリ
-│   ├── unit/
-│   ├── integration/
-│   └── conftest.py
-├── docs/                        # ドキュメント
-├── scripts/
-├── pyproject.toml
-├── .gitignore
-├── .pre-commit-config.yaml
-├── README.md
-└── CLAUDE.md
-```
-
 ## 実装時の必須要件
 
 **重要**: コードを書く際は、必ず以下のすべてを遵守してください：
@@ -77,7 +30,7 @@ project-root/
 - **GitHub操作**: `gh`コマンド
 - **品質保証**: pre-commitフック設定済み。`uv run task check-all` で包括的チェック
 
-### 1. コード品質を保証する
+### コード品質を保証する
 
 **コード品質保証のベストプラクティスは「コーディング規約」セクションを参照してください。**
 
@@ -89,14 +42,14 @@ project-root/
 - `uv run pytest PATH`: テスト実行
 - まとめて実行: `uv run task check`（format → lint → typecheck → test）
 
-### 1-5. 実装フロー
+### 実装フロー
 1. **品質**: format→lint→typecheck→test
 2. **テスト**: 新機能::TDD必須
 3. **ロギング**: 全コード::ログ必須
 4. **性能**: 重い処理→プロファイル
 5. **段階的**: Protocol»テスト»実装»最適化
 
-### 6. 効率化テクニック
+### 効率化テクニック
 
 #### コミュニケーション記法
 ```yaml
@@ -112,18 +65,6 @@ project-root/
 - **リトライ**: max3回 & 指数バックオフ
 - **フォールバック**: 高速→確実
 - **状態復元**: チェックポイント»ロールバック|正常状態»再開|失敗のみ»再実行
-
-## template/ディレクトリの活用
-
-実装前に必ず参照:
-- **クラス/関数**: @template/src/template_package/core/example.py (型ヒント|docstring|エラー処理)
-- **型定義**: @template/src/template_package/schemas.py
-- **ユーティリティ**: @template/src/template_package/utils/helpers.py
-- **テスト**: @template/tests/{unit|property|integration}/
-- **フィクスチャ**: @template/tests/conftest.py
-- **ロギング**: @template/src/template_package/utils/logging_config.py
-実装時: template/内の類似例確認»パターン踏襲»プロジェクト調整
-注: template/は変更&削除禁止
 
 ## よく使うコマンド
 
@@ -164,26 +105,6 @@ uv lock --upgrade                  # 依存関係を更新
 
 ## コーディング規約
 
-### ディレクトリ構成
-
-パッケージとテストは @template/ 内の構造を踏襲します。コアロジックは必ず `src/project_name` 内に配置してください。
-
-```
-src/
-├── project_name/
-│   ├── core/
-│   ├── utils/
-│   ├── __init__.py
-│   └── ...
-├── tests/
-│   ├── unit/
-│   ├── property/
-│   ├── integration/
-│   └── conftest.py
-├── docs/
-...
-```
-
 ## Git規則
 
 **ブランチ**: feature/ | fix/ | docs/ | test/
@@ -192,21 +113,20 @@ src/
 
 ### ディレクトリ構成
 
-パッケージとテストは `template/` 内の構造を踏襲、コアロジックは必ず `src/project_name` 内に配置
+- コアロジックは必ず `src/project_name` 内に配置
+- 単体・統合テストは `tests/` 内に配置。APIをモック化したテストもここに配置
+- APIを実際に叩くなどの手動テストは `manual_tests/` 内に配置
+
 
 ```
 src/
 ├── project_name/
-│   ├── core/
-│   ├── utils/
 │   ├── __init__.py
 │   └── ...
 ├── tests/
-│   ├── unit/
-│   ├── property/
-│   ├── integration/
 │   └── conftest.py
 ├── manual_tests/
+│   └── conftest.py
 ├── docs/
 ...
 ```
@@ -267,23 +187,37 @@ assert add(-1, -2) == -3
 - 日本語テスト名推奨
 - リファクタ: 重複|可読性|SOLID違反時
 
-### テスト種別
-1. **単体**: 基本動作 `template/tests/unit/`
-3. **統合**: 連携テスト `template/tests/integration/`
 
 ### テスト命名
 - 1関数1クラス。`class TestFunctionName`
 - メソッドでケースごとのテスト。`def test_[正常系|異常系|エッジケース]_条件で結果()`
 
+例:
+```python
+class TestAddFunction:
+    def test_正常系_正の整数で結果(self):
+        assert add(2, 3) == 5
+    def test_異常系_負の整数で例外(self):
+        with pytest.raises(ValueError):
+            add(-1, 3)
+    def test_エッジケース_ゼロで結果(self):
+        assert add(0, 0) == 0
+```
 ## ロギング
 
 ### 必須要件
 1. モジュール冒頭::ロガー定義
+
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+```
+
 2. 関数開始&終了::ログ出力
 3. エラー時::exc_info=True
 4. レベル: DEBUG|INFO|WARNING|ERROR
-
-ベストプラクティス: @template/src/template_package/utils/logging_config.py & @template/src/template_package/core/example.py
 
 ### 設定
 ```python
@@ -303,9 +237,6 @@ def test_カスタムログレベル(set_test_log_level):
     set_test_log_level("WARNING")
     # テスト実行
 ```
-
-
-ベストプラクティス: @template/src/template_package/utils/profiling.py
 
 ## 更新トリガー
 
