@@ -21,9 +21,6 @@ applyTo: "**"
 
 ## 実装時の必須要件
 
-**重要**: コードを書く際は、必ず以下のすべてを遵守してください：
-
-
 ### 0. 開発環境
 - **パッケージ管理**: uvで環境を統一管理。Pythonコマンドは必ず `uv run` を前置
 - **依存関係追加**: `uv add` (通常) / `uv add --dev` (開発用)
@@ -42,29 +39,6 @@ applyTo: "**"
 - `uv run pytest PATH`: テスト実行
 - まとめて実行: `uv run task check`（format → lint → typecheck → test）
 
-### 実装フロー
-1. **品質**: format→lint→typecheck→test
-2. **テスト**: 新機能::TDD必須
-3. **ロギング**: 全コード::ログ必須
-4. **性能**: 重い処理→プロファイル
-5. **段階的**: Protocol»テスト»実装»最適化
-
-### 効率化テクニック
-
-#### コミュニケーション記法
-```yaml
-→: "処理フロー"      # analyze→fix→test
-|: "選択/区切り"     # option1|option2
-&: "並列/結合"       # task1 & task2
-::: "定義"           # variable :: value
-»: "シーケンス"      # step1 » step2
-@: "参照/場所"       # @file:line
-```
-
-#### エラーリカバリー
-- **リトライ**: max3回 & 指数バックオフ
-- **フォールバック**: 高速→確実
-- **状態復元**: チェックポイント»ロールバック|正常状態»再開|失敗のみ»再実行
 
 ## よく使うコマンド
 
@@ -103,18 +77,16 @@ uv add --dev dev_package_name      # 開発依存関係
 uv lock --upgrade                  # 依存関係を更新
 ```
 
-## コーディング規約
-
 ## Git規則
 
 **ブランチ**: feature/ | fix/ | docs/ | test/
 **ラベル**: enhancement | bug | documentation | test
-## コーディング規約
 
 ### ディレクトリ構成
 
-- コアロジックは必ず `src/project_name` 内に配置
-- 単体・統合テストは `tests/` 内に配置。APIをモック化したテストもここに配置
+- コアロジックは `src/project_name` 内に配置
+- ユーザ、「開発者向けの実行スクリプトは `scripts/` 内に配置
+- 自動テストは `tests/` 内に配置。APIをモック化したテストもここに配置。
 - APIを実際に叩くなどの手動テストは `manual_tests/` 内に配置
 
 
@@ -128,64 +100,21 @@ src/
 ├── manual_tests/
 │   └── conftest.py
 ├── docs/
+├── scripts/
 ...
 ```
 
 ### Python コーディングスタイル
 - 型ヒント: Python 3.12+スタイル必須（pyright + PEP 695）
 - Docstring: Google Docs形式
-- 命名: クラス(PascalCase)、関数(snake_case)、定数(UPPER_SNAKE)、プライベート(_prefix)
-- ベストプラクティス: @template/src/template_package/schemas.py
-
-### エラーメッセージ
-
-1. **具体的**: "Invalid input" → "Expected positive integer, got {count}"
-2. **コンテキスト付き**: "Failed to process {source_file}: {e}"
-3. **解決策を提示**: "Not found. Create by: python -m {__package__}.init"
-
-### アンカーコメント
-```python
-# AIDEV-NOTE: 説明
-# AIDEV-TODO: 課題
-# AIDEV-QUESTION: 疑問
-```
+- 命名: クラス(PascalCase)、関数(snake_case)、定数(UPPER_SNAKE)、プライベート(_prefix)s
 
 ## テスト戦略（TDD）
 
-t-wada流のテスト駆動開発（TDD）を徹底
-
-### サイクル
-🔴 Red » 🟢 Green » 🔵 Refactor
-
-### 手順
-1. TODO作成
-2. 失敗テスト
-3. 最小実装（仮実装OK）
-4. リファクタ
-
-### 原則
-- 小さなステップで進める
-- 三角測量で一般化
-- 不安な部分から着手
-- テストリストを常に更新
-
-#### 三角測量の例
-```python
-# 1. 仮実装: return 5
-assert add(2, 3) == 5
-
-# 2. 一般化: return a + b
-assert add(10, 20) == 30
-
-# 3. エッジケース確認
-assert add(-1, -2) == -3
-```
-
-#### 注意点
-- 1test::1behavior
-- Red»Greenでコミット
-- 日本語テスト名推奨
-- リファクタ: 重複|可読性|SOLID違反時
+- t-wada流のテスト駆動開発（TDD）を徹底
+- サイクル: 🔴 Red » 🟢 Green » 🔵 Refactor
+- まずはe2eに近いところで正常系にしぼったシンプルなテストのみ書く。その他のテストはユーザ指示に応じて追加。
+- `scripts/`のスクリプトに対してもsubprocessで呼び出す形でテストを書く
 
 
 ### テスト命名
@@ -205,8 +134,7 @@ class TestAddFunction:
 ```
 ## ロギング
 
-### 必須要件
-1. モジュール冒頭::ロガー定義
+ロガーを使用する
 
 ```python
 import logging
@@ -215,34 +143,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 ```
 
-2. 関数開始&終了::ログ出力
-3. エラー時::exc_info=True
-4. レベル: DEBUG|INFO|WARNING|ERROR
 
-### 設定
-```python
-setup_logging(level="INFO")
-# または export LOG_LEVEL=INFO
-```
-
-### テスト時の設定
-```bash
-# 環境変数でテスト時のログレベル制御
-export TEST_LOG_LEVEL=INFO  # デフォルトはDEBUG
-```
-
-```python
-# 個別テストでログレベル変更
-def test_カスタムログレベル(set_test_log_level):
-    set_test_log_level("WARNING")
-    # テスト実行
-```
-
-## 更新トリガー
-
-- 仕様/依存関係/構造/規約の変更時
-- 同一質問2回以上 → FAQ追加
-- エラーパターン2回以上 → トラブルシューティング追加
 
 ## トラブルシューティング/FAQ
 
