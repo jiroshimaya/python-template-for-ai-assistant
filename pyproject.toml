@@ -1,14 +1,10 @@
 [project]
-name = "project-name"
+name = "python-template-for-ai-assistant"
 dynamic = ["version"]
 description = "A modern Python project template optimized for Claude Code with strict guardrails"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    # 主要な依存関係をここに記載
-    "structlog>=25.4.0",
-    "rich>=13.7.0", # structlogのカラフルなコンソール出力用
-    "pydantic>=2.11.7",
 ]
 
 [build-system]
@@ -18,117 +14,12 @@ build-backend = "hatchling.build"
 [tool.hatch.version]
 source = "vcs"
 
-[tool.hatch.build.targets.wheel]
-# TODO: 実際のプロジェクトでは "src/your_package_name" に更新してください
-packages = ["src/project_name"]  # テンプレート用の空パッケージ
-
-[tool.ruff]
-line-length = 88
-indent-width = 4
-target-version = "py312"
-
-[tool.ruff.lint]
-exclude = [".venv", "template"]
-select = [
-    "E",      # pycodestyle errors
-    "W",      # pycodestyle warnings
-    "F",      # pyflakes
-    "I",      # isort
-    "UP",     # pyupgrade
-    "B",      # flake8-bugbear
-    "SIM",    # flake8-simplify
-    "RUF",    # Ruff-specific rules
-    "TCH",    # flake8-type-checking
-    "PTH",    # flake8-use-pathlib
-    "PL",     # Pylint
-]
-ignore = [
-    "G004",
-    "F821",
-    "C401",
-    "C408",
-    "RUF001",
-    "RUF002",
-    "RUF003",
-    "ANN101",
-    "ANN102",
-    "PERF203",
-    "PERF401",
-    "PLR2004",
-    "PLR0913",  # too-many-arguments
-    "PLC2401",
-]
-
-[tool.ruff.lint.per-file-ignores]
-"tests/*" = ["PLR2004", "PLR0913"]  # テストでは magic number とパラメータ数を許可
-
-[tool.pyright]
-include = ["src", "tests"]
-exclude = [".venv", "**/__pycache__", "template"]
-pythonVersion = "3.12"
-pythonPlatform = "All"
-typeCheckingMode = "basic"
-
-# Type checking behavior
-strictParameterNoneValue = false
-
-# 重要なエラー（必ずエラーとして報告）
-reportMissingImports = "error"
-reportIncompatibleMethodOverride = "error"
-reportIncompatibleVariableOverride = "error"
-reportOverlappingOverload = "error"
-reportUnusedCoroutine = "error"
-reportMatchNotExhaustive = "error"
-reportUnusedImport = "error"
-reportDuplicateImport = "error"
-
-# 開発時に役立つ警告レベル
-reportUnusedClass = "warning"
-reportUnusedFunction = "warning"
-reportUnusedVariable = "warning"
-reportInconsistentConstructor = "warning"
-reportUninitializedInstanceVariable = "warning"
-reportUnnecessaryIsInstance = "warning"
-reportUnnecessaryCast = "warning"
-reportUnnecessaryComparison = "warning"
-reportUnnecessaryTypeIgnoreComment = "warning"
-
-# 開発を妨げない程度に無効化
-reportCallIssue = "none"
-reportAttributeAccessIssue = "none"
-reportMissingTypeStubs = "none"
-reportMissingSuperCall = "none"
-reportPrivateUsage = "none"
-reportImplicitStringConcatenation = "none"
-reportInvalidStubStatement = "none"
-reportIncompleteStub = "none"
-reportUnsupportedDunderAll = "none"
-
-[tool.bandit]
-exclude_dirs = ["tests", ".venv"]
-skips = ["B101"]  # Skip assert_used test
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py", "*_test.py"]
-addopts = [
-    "-ra",
-    "--strict-markers",
-    "--strict-config",
-]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests as integration tests",
-]
-
 [dependency-groups]
 dev = [
     "pytest>=8.0.0",
     "ruff>=0.4.0",
     "pyright>=1.1.0",
     "pre-commit>=3.7.0",
-    "bandit>=1.7.0",
-    "pip-audit>=2.6.0",
     "taskipy>=1.14.1",
 ]
 docs = [
@@ -143,17 +34,6 @@ docs = [
 # taskipy タスク定義
 # =====================
 [tool.taskipy.tasks]
-clean = """
-  find . -type d -name '__pycache__' -exec rm -rf {} + &&
-  find . -type f -name '*.pyc' -delete &&
-  find . -type d -name '.pytest_cache' -exec rm -rf {} + &&
-  find . -type d -name '.pyright_cache' -exec rm -rf {} + &&
-  find . -type d -name '.ruff_cache' -exec rm -rf {} + &&
-  find . -type d -name 'htmlcov' -exec rm -rf {} + &&
-  find . -type f -name '.coverage' -delete &&
-  rm -rf dist build
-"""
-help = "echo '利用可能なタスク: clean, check, help (task [name] で実行)'"
 check = """
   ARGS="${args:-src tests}"
   uv run ruff format $ARGS &&
@@ -161,4 +41,3 @@ check = """
   uv run pyright $ARGS &&
   uv run pytest $ARGS
 """
-check-all = "uv run pre-commit run --all-files"

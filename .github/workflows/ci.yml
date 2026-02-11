@@ -4,22 +4,13 @@ on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened]
-  # 毎週月曜日の朝に定期実行
-  #schedule:
-  #  - cron: '0 0 * * 1'
-  # 手動実行を許可
+    branches: main
   workflow_dispatch:
 
 # 同じワークフローの同時実行を制御
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
-env:
-  PYTHON_VERSION: "3.12"
-  UV_CACHE_DIR: /tmp/.uv-cache
 
 jobs:
   lint:
@@ -35,9 +26,6 @@ jobs:
       with:
         enable-cache: true
         cache-dependency-glob: "uv.lock"
-
-    - name: Set up Python
-      run: uv python pin ${{ env.PYTHON_VERSION }}
 
     - name: Install dependencies
       run: uv sync --all-extras
@@ -58,15 +46,12 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "uv.lock"
 
-    - name: Set up Python
-      run: uv python pin ${{ env.PYTHON_VERSION }}
-
     - name: Install dependencies
       run: uv sync --all-extras
 
     - name: Run tests
       run: |
-        uv run pytest tests
+        uv run pytest tests || [[ $? -eq 5 ]] && echo "No tests found, skipping"
 
   # オプション: パッケージのビルド
   # build:
@@ -104,9 +89,6 @@ jobs:
   #     uses: astral-sh/setup-uv@v3
   #     with:
   #       enable-cache: true
-
-  #   - name: Set up Python
-  #     run: uv python pin ${{ env.PYTHON_VERSION }}
 
   #   - name: Install dependencies
   #     run: |

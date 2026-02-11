@@ -21,4 +21,4 @@ jobs:
     - name: Update Version
       run: |
         # パッチバージョンを1つ上げる
-        bash .github/scripts/update_version.sh -i patch 
+        bash .github/scripts/update_version.sh -i patch
