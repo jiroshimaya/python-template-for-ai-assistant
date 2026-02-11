@@ -51,7 +51,7 @@ jobs:
 
     - name: Run tests
       run: |
-        uv run pytest tests
+        uv run pytest tests || [[ $? -eq 5 ]] && echo "No tests found, skipping"
 
   # オプション: パッケージのビルド
   # build:
