@@ -29,7 +29,7 @@ fi
 # Output the new version
 if [[ -n "$version" ]]; then
     new_version=$version
-else 
+else
     # Get the current version if not provided
     current_version=$(git ls-remote --tags origin | awk -F'/' '{print $3}' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1)
 
@@ -58,7 +58,7 @@ else
         patch)
             ((version_parts[2]++))
             ;;
-        
+
     esac
 
     new_version="v${version_parts[0]}.${version_parts[1]}.${version_parts[2]}"
