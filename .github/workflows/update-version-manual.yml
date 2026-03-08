@@ -1,37 +1,26 @@
-name: Update Version Manual
+name: Update Version Auto
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.py'
   workflow_dispatch:
-    inputs:
-      increment_type:
-        description: Version increment type
-        required: true
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
-      dry_run:
-        description: Dry Run
-        required: false
-        default: false
-        type: boolean
 
 jobs:
-  publish:
+  update-version:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - uses: actions/checkout@v5
 
+    - name: Fetch Tags
+      run: git fetch --tags
+
     - name: Update Version
-      if: ${{ inputs.increment_type != '' }}
       run: |
-        args=""
-        if [ -n "${{ inputs.increment_type }}" ]; then
-          args="$args -i ${{ inputs.increment_type }}"
-        fi
-        if [ "${{ inputs.dry_run }}" = "true" ]; then
-          args="$args -n"
-        fi
-        bash .github/scripts/update_version.sh $args
+        # パッチバージョンを1つ上げる
+        bash .github/scripts/update_version.sh -i patch
