@@ -88,7 +88,7 @@ setup_python() {
 setup_precommit() {
     print_step "Setting up pre-commit hooks..."
 
-    uv run pre-commit install --hook-type pre-push
+    uv run pre-commit install --hook-type pre-commit
 
     # Run pre-commit on all files to ensure everything is set up
     print_step "Running initial pre-commit checks..."
