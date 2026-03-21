@@ -1,0 +1,73 @@
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+
+SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "protect_config.py"
+
+
+def run_hook(payload: dict[str, object], **env_overrides: str) -> subprocess.CompletedProcess[str]:
+    env = os.environ.copy()
+    env.update(env_overrides)
+    return subprocess.run(
+        [sys.executable, str(SCRIPT_PATH)],
+        input=json.dumps(payload),
+        text=True,
+        capture_output=True,
+        env=env,
+        check=False,
+    )
+
+
+class TestProtectConfigHook:
+    def test_正常系_pyproject編集時に警告して続行する(self) -> None:
+        result = run_hook(
+            {
+                "toolName": "apply_patch",
+                "toolArgs": "*** Begin Patch\n*** Update File: pyproject.toml\n@@\n-deps = []\n+deps = [\"pytest\"]\n*** End Patch\n",
+            }
+        )
+
+        assert result.returncode == 0
+        assert "pyproject.toml" in result.stderr
+        assert "設定ではなくコードを直す" in result.stderr
+
+    def test_異常系_blockポリシー時に未許可編集を拒否する(self) -> None:
+        result = run_hook(
+            {
+                "toolName": "apply_patch",
+                "toolArgs": "*** Begin Patch\n*** Update File: pyproject.toml\n@@\n-deps = []\n+deps = [\"pytest\"]\n*** End Patch\n",
+            },
+            COPILOT_PROTECTED_CONFIG_POLICY="block",
+        )
+
+        assert result.returncode != 0
+        assert "COPILOT_ALLOW_PYPROJECT_TOML_EDIT=1" in result.stderr
+
+    def test_正常系_明示許可があればblockポリシーでも編集できる(self) -> None:
+        result = run_hook(
+            {
+                "toolName": "apply_patch",
+                "toolArgs": "*** Begin Patch\n*** Update File: pyproject.toml\n@@\n-deps = []\n+deps = [\"pytest\"]\n*** End Patch\n",
+            },
+            COPILOT_PROTECTED_CONFIG_POLICY="block",
+            COPILOT_ALLOW_PYPROJECT_TOML_EDIT="1",
+        )
+
+        assert result.returncode == 0
+        assert result.stderr == ""
+
+    def test_エッジケース_閲覧ツールでのpyproject参照は警告しない(self) -> None:
+        result = run_hook(
+            {
+                "toolName": "view",
+                "toolArgs": {"path": "pyproject.toml"},
+            }
+        )
+
+        assert result.returncode == 0
+        assert result.stderr == ""
