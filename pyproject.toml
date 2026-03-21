@@ -17,9 +17,6 @@ source = "vcs"
 [tool.ruff]
 include = ["src/**/*.py"]
 
-[tool.ty]
-include = ["src"]
-
 [dependency-groups]
 dev = [
     "pytest>=8.0.0",
@@ -43,6 +40,6 @@ docs = [
 check = """
   uv run ruff format &&
   uv run ruff check --fix &&
-  uv run ty &&
+  uv run ty check src &&
   uv run pytest tests
 """

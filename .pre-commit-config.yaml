@@ -25,7 +25,8 @@ repos:
     hooks:
       - id: ty
         name: ty
-        entry: uv run ty
+        entry: uv run ty check src
         language: system
+        pass_filenames: false
         files: ^src/
         types: [python]
