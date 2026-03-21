@@ -24,7 +24,7 @@ include = ["src"]
 dev = [
     "pytest>=8.0.0",
     "ruff>=0.4.0",
-    "ty>=0.8.0",
+    "ty==0.0.24",
     "pre-commit>=3.7.0",
     "taskipy>=1.14.1",
 ]
