@@ -13,7 +13,7 @@
 
 例:
 
-- `00001-prioritize-executable-guardrails.md`
+- `00001-replace-pyright-with-ty.md`
 - `00002-store-agent-policy-as-adr.md`
 
 ## ステータス

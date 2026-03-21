@@ -16,7 +16,7 @@ sh scripts/setup.sh
 このテンプレートの重要な設計判断は `docs/adr/` に ADR として保存します。
 
 - 運用ルール: [`docs/adr/README.md`](docs/adr/README.md)
-- 初回 ADR: [`docs/adr/00001-prioritize-executable-guardrails.md`](docs/adr/00001-prioritize-executable-guardrails.md)
+- 初回 ADR: [`docs/adr/00001-replace-pyright-with-ty.md`](docs/adr/00001-replace-pyright-with-ty.md)
 
 ## ライセンス
 
