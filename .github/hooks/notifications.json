@@ -4,7 +4,7 @@
     "preToolUse": [
       {
         "type": "command",
-        "bash": "python3 ./protect_config.py",
+        "bash": "./protect_config.sh",
         "cwd": "scripts",
         "timeoutSec": 10
       },

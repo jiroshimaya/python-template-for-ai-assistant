@@ -3,18 +3,17 @@ from __future__ import annotations
 import json
 import os
 import subprocess
-import sys
 from pathlib import Path
 
 
-SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "protect_config.py"
+SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "protect_config.sh"
 
 
 def run_hook(payload: dict[str, object], **env_overrides: str) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env.update(env_overrides)
     return subprocess.run(
-        [sys.executable, str(SCRIPT_PATH)],
+        ["bash", str(SCRIPT_PATH)],
         input=json.dumps(payload),
         text=True,
         capture_output=True,
