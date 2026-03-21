@@ -23,9 +23,9 @@ repos:
   # Type checking
   - repo: local
     hooks:
-      - id: pyright
-        name: pyright
-        entry: uv run pyright
+      - id: ty
+        name: ty
+        entry: uv run ty
         language: system
         files: ^src/
         types: [python]

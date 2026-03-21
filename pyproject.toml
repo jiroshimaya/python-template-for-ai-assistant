@@ -17,14 +17,14 @@ source = "vcs"
 [tool.ruff]
 include = ["src/**/*.py"]
 
-[tool.pyright]
+[tool.ty]
 include = ["src"]
 
 [dependency-groups]
 dev = [
     "pytest>=8.0.0",
     "ruff>=0.4.0",
-    "pyright>=1.1.0",
+    "ty>=0.8.0",
     "pre-commit>=3.7.0",
     "taskipy>=1.14.1",
 ]
@@ -43,6 +43,6 @@ docs = [
 check = """
   uv run ruff format &&
   uv run ruff check --fix &&
-  uv run pyright &&
+  uv run ty &&
   uv run pytest tests
 """
