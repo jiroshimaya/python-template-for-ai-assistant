@@ -34,7 +34,10 @@ class TestPreToolUseRuffGate:
         assert result.returncode == 0
         response = json.loads(result.stdout)
         assert response["permissionDecision"] == "deny"
-        assert ".github/hooks/state/lint-summary.md" in response["permissionDecisionReason"]
+        assert (
+            ".github/hooks/state/lint-summary.md"
+            in response["permissionDecisionReason"]
+        )
         assert "src/example.py" in response["permissionDecisionReason"]
 
     def test_正常系_未解消対象ファイルのeditは許可する(self, tmp_path: Path) -> None:
@@ -68,7 +71,9 @@ class TestPreToolUseRuffGate:
         assert result.stdout == ""
 
 
-def _run_pre_hook(tmp_path: Path, payload: dict[str, object]) -> subprocess.CompletedProcess[str]:
+def _run_pre_hook(
+    tmp_path: Path, payload: dict[str, object]
+) -> subprocess.CompletedProcess[str]:
     repo_root = Path(__file__).resolve().parents[1]
     script_path = repo_root / "scripts" / "pre_tool_use_ruff_gate.sh"
 

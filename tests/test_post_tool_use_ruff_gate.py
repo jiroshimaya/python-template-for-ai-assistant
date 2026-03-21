@@ -36,9 +36,9 @@ class TestPostToolUseRuffGate:
 
         assert result.returncode == 0
         state = json.loads(
-            (tmp_path / ".github" / "hooks" / "state" / "ruff-quality-gate.json").read_text(
-                encoding="utf-8"
-            )
+            (
+                tmp_path / ".github" / "hooks" / "state" / "ruff-quality-gate.json"
+            ).read_text(encoding="utf-8")
         )
         assert state["unresolvedFiles"] == ["src/example.py"]
 
