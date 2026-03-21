@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "./post_tool_use_ruff_gate.sh",
+        "cwd": "scripts",
+        "timeoutSec": 30
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "./pre_tool_use_ruff_gate.sh",
+        "cwd": "scripts",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}
