@@ -6,3 +6,8 @@
 - uvを使えるところ（pythonパッケージの追加、削除、実行など）はuvを使ってください。
 - twada流のTDDを徹底してください。
 - GitHub CLIを使用してください。
+
+## ADR
+
+このテンプレートの重要な設計判断は `docs/adr/` に ADR として保存します。
+- 運用ルール: [`docs/adr/README.md`](docs/adr/README.md)
