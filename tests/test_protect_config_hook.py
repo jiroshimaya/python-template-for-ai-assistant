@@ -23,7 +23,7 @@ def run_hook(payload: dict[str, object], **env_overrides: str) -> subprocess.Com
 
 
 class TestProtectConfigHook:
-    def test_正常系_pyproject編集時に警告して続行する(self) -> None:
+    def test_正常系_pyproject編集時に確認付きaskを返す(self) -> None:
         result = run_hook(
             {
                 "toolName": "apply_patch",
@@ -32,10 +32,12 @@ class TestProtectConfigHook:
         )
 
         assert result.returncode == 0
-        assert "pyproject.toml" in result.stderr
-        assert "設定ではなくコードを直す" in result.stderr
+        response = json.loads(result.stdout)
+        assert response["permissionDecision"] == "ask"
+        assert "pyproject.toml" in response["permissionDecisionReason"]
+        assert "設定ではなくコードを直す" in response["permissionDecisionReason"]
 
-    def test_異常系_blockポリシー時に未許可編集を拒否する(self) -> None:
+    def test_異常系_blockポリシー時にdenyを返す(self) -> None:
         result = run_hook(
             {
                 "toolName": "apply_patch",
@@ -44,8 +46,10 @@ class TestProtectConfigHook:
             COPILOT_PROTECTED_CONFIG_POLICY="block",
         )
 
-        assert result.returncode != 0
-        assert "COPILOT_ALLOW_PYPROJECT_TOML_EDIT=1" in result.stderr
+        assert result.returncode == 0
+        response = json.loads(result.stdout)
+        assert response["permissionDecision"] == "deny"
+        assert "COPILOT_ALLOW_PYPROJECT_TOML_EDIT=1" in response["permissionDecisionReason"]
 
     def test_正常系_明示許可があればblockポリシーでも編集できる(self) -> None:
         result = run_hook(
@@ -58,6 +62,7 @@ class TestProtectConfigHook:
         )
 
         assert result.returncode == 0
+        assert result.stdout == ""
         assert result.stderr == ""
 
     def test_エッジケース_閲覧ツールでのpyproject参照は警告しない(self) -> None:
@@ -69,4 +74,5 @@ class TestProtectConfigHook:
         )
 
         assert result.returncode == 0
+        assert result.stdout == ""
         assert result.stderr == ""

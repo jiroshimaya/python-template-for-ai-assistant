@@ -46,26 +46,17 @@ normalize_policy() {
 }
 
 emit_message() {
-  local policy="$1"
+  local decision="$1"
+  local reason
 
-  if [ "$policy" = "block" ]; then
-    cat >&2 <<EOF
-[blocked] protected config の編集を拒否しました。
-[protected-config] ${protected_path} は protected config です。
-lint や型エラーを消すために、設定ではなくコードを直してください。
-「設定ではなくコードを直す」方針で対応してください。
-意図的なメンテナンス変更が必要な場合は、Copilot CLI 起動前に ${allow_env_var}=1 を設定してください。
-EOF
-    return
+  if [ "$decision" = "deny" ]; then
+    reason="pyproject.toml は protected config です。設定ではなくコードを直す方針で対応してください。意図的なメンテナンス変更が必要な場合は Copilot CLI 起動前に ${allow_env_var}=1 を設定してください。"
+  else
+    reason="pyproject.toml は protected config です。設定ではなくコードを直す方針で対応してください。必要ならこの操作を明示承認してください。恒久的に許可する場合は Copilot CLI 起動前に ${allow_env_var}=1 を設定してください。"
   fi
 
-  cat >&2 <<EOF
-[warning] protected config への編集を検知しました。
-[protected-config] ${protected_path} は protected config です。
-lint や型エラーを消すために、設定ではなくコードを直してください。
-「設定ではなくコードを直す」方針で対応してください。
-意図的なメンテナンス変更が必要な場合は、Copilot CLI 起動前に ${allow_env_var}=1 を設定してください。
-より厳格に運用したい場合は ${policy_env_var}=block を設定してください。
+  cat <<EOF
+{"permissionDecision":"${decision}","permissionDecisionReason":"${reason}"}
 EOF
 }
 
@@ -87,10 +78,11 @@ if [ -n "$tool_name" ] && is_read_only_tool "$tool_name"; then
 fi
 
 policy="$(normalize_policy)"
-emit_message "$policy"
-
 if [ "$policy" = "block" ]; then
-  exit 2
+  emit_message "deny"
+  exit 0
 fi
+
+emit_message "ask"
 
 exit 0
