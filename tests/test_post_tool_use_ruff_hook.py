@@ -24,7 +24,9 @@ class TestPostToolUseRuffHook:
         assert result.stdout == ""
         assert _read_uv_log(tmp_path) == []
 
-    def test_正常系_writeでpythonファイルにformatとcheckを実行する(self, tmp_path: Path) -> None:
+    def test_正常系_writeでpythonファイルにformatとcheckを実行する(
+        self, tmp_path: Path
+    ) -> None:
         source_path = tmp_path / "src" / "example.py"
         source_path.parent.mkdir(parents=True)
         source_path.write_text("print('hello')\n", encoding="utf-8")
@@ -47,7 +49,9 @@ class TestPostToolUseRuffHook:
             "run ruff check src/example.py",
         ]
 
-    def test_異常系_apply_patchのcheck失敗時に修正しやすい結果を返す(self, tmp_path: Path) -> None:
+    def test_異常系_apply_patchのcheck失敗時に修正しやすい結果を返す(
+        self, tmp_path: Path
+    ) -> None:
         source_path = tmp_path / "src" / "broken.py"
         source_path.parent.mkdir(parents=True)
         source_path.write_text("print('broken')\n", encoding="utf-8")
@@ -91,7 +95,9 @@ class TestPostToolUseRuffHook:
         ]
 
 
-def _run_hook(tmp_path: Path, payload: dict[str, object], *, fail_check: bool = False) -> subprocess.CompletedProcess[str]:
+def _run_hook(
+    tmp_path: Path, payload: dict[str, object], *, fail_check: bool = False
+) -> subprocess.CompletedProcess[str]:
     repo_root = Path(__file__).resolve().parents[1]
     script_path = repo_root / "scripts" / "post_tool_use_ruff.sh"
     uv_log_path = tmp_path / "uv.log"
