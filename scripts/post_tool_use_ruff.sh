@@ -29,7 +29,7 @@ extract_files_from_tool_args() {
   local tool_args_json="$2"
 
   case "$tool_name" in
-    write | edit | multiEdit)
+    write | edit | create | multiEdit)
       printf '%s' "$tool_args_json" | jq -r '
         [
           .. | objects | (.file_path?, .path?)
@@ -67,7 +67,7 @@ extract_files_from_tool_args() {
 
 is_target_tool() {
   case "$1" in
-    write | edit | multiEdit | apply_patch)
+    write | edit | create | multiEdit | apply_patch)
       return 0
       ;;
     *)
@@ -85,8 +85,18 @@ input="$(cat)"
 
 if ! cwd="$(printf '%s' "$input" | jq -r '.cwd // empty')" ||
   ! tool_name="$(printf '%s' "$input" | jq -r '.toolName // .tool // empty')" ||
-  ! tool_exit_code="$(printf '%s' "$input" | jq -r '.exitCode // 0')" ||
-  ! tool_args_json="$(printf '%s' "$input" | jq -c '.toolArgs // .args // {}')"; then
+  ! tool_result_type="$(printf '%s' "$input" | jq -r '
+    .toolResult.resultType //
+    (if (.exitCode // 0) == 0 then "success" else "failure" end)
+  ')" ||
+  ! tool_args_json="$(printf '%s' "$input" | jq -c '
+    (.toolArgs // .args // {})
+    | if type == "string" then
+        (try fromjson catch .)
+      else
+        .
+      end
+  ')"; then
   echo "postToolUse ruff hook の入力 JSON を解析できませんでした"
   exit 1
 fi
@@ -96,8 +106,8 @@ if [ -z "$tool_name" ] || ! is_target_tool "$tool_name"; then
   exit 0
 fi
 
-if [ "$tool_exit_code" != "0" ]; then
-  log_debug "skip reason=tool_failed tool=$tool_name exit_code=$tool_exit_code"
+if [ "$tool_result_type" != "success" ]; then
+  log_debug "skip reason=tool_failed tool=$tool_name result_type=$tool_result_type"
   exit 0
 fi
 

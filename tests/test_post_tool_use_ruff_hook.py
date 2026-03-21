@@ -15,8 +15,8 @@ class TestPostToolUseRuffHook:
             payload={
                 "cwd": str(tmp_path),
                 "toolName": "read",
-                "toolArgs": {"file_path": "src/example.py"},
-                "exitCode": 0,
+                "toolArgs": json.dumps({"file_path": "src/example.py"}),
+                "toolResult": {"resultType": "success"},
             },
         )
 
@@ -24,7 +24,7 @@ class TestPostToolUseRuffHook:
         assert result.stdout == ""
         assert _read_uv_log(tmp_path) == []
 
-    def test_正常系_writeでpythonファイルにformatとcheckを実行する(
+    def test_正常系_editでpythonファイルにformatとcheckを実行する(
         self, tmp_path: Path
     ) -> None:
         source_path = tmp_path / "src" / "example.py"
@@ -35,9 +35,9 @@ class TestPostToolUseRuffHook:
             tmp_path=tmp_path,
             payload={
                 "cwd": str(tmp_path),
-                "toolName": "write",
-                "toolArgs": {"file_path": "src/example.py"},
-                "exitCode": 0,
+                "toolName": "edit",
+                "toolArgs": json.dumps({"file_path": "src/example.py"}),
+                "toolResult": {"resultType": "success"},
             },
         )
 
@@ -61,23 +61,25 @@ class TestPostToolUseRuffHook:
             payload={
                 "cwd": str(tmp_path),
                 "toolName": "apply_patch",
-                "toolArgs": {
-                    "input": textwrap.dedent(
-                        """\
-                        *** Begin Patch
-                        *** Update File: src/broken.py
-                        @@
-                        -print('broken')
-                        +print(  'broken')
-                        *** Update File: README.md
-                        @@
-                        -old
-                        +new
-                        *** End Patch
-                        """
-                    )
-                },
-                "exitCode": 0,
+                "toolArgs": json.dumps(
+                    {
+                        "input": textwrap.dedent(
+                            """\
+                            *** Begin Patch
+                            *** Update File: src/broken.py
+                            @@
+                            -print('broken')
+                            +print(  'broken')
+                            *** Update File: README.md
+                            @@
+                            -old
+                            +new
+                            *** End Patch
+                            """
+                        )
+                    }
+                ),
+                "toolResult": {"resultType": "success"},
             },
             fail_check=True,
         )
@@ -93,6 +95,23 @@ class TestPostToolUseRuffHook:
             "run ruff format src/broken.py",
             "run ruff check src/broken.py",
         ]
+
+    def test_正常系_tool_resultがfailureならruffを実行しない(
+        self, tmp_path: Path
+    ) -> None:
+        result = _run_hook(
+            tmp_path=tmp_path,
+            payload={
+                "cwd": str(tmp_path),
+                "toolName": "edit",
+                "toolArgs": json.dumps({"file_path": "src/example.py"}),
+                "toolResult": {"resultType": "failure"},
+            },
+        )
+
+        assert result.returncode == 0
+        assert result.stdout == ""
+        assert _read_uv_log(tmp_path) == []
 
 
 def _run_hook(
