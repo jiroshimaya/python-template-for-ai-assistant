@@ -1,4 +1,4 @@
-# ADR 0001: ローカルフックを pre-push から pre-commit に切り替える
+# ADR 0002: ローカルフックを pre-push から pre-commit に切り替える
 
 ## ステータス
 
