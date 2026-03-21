@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "./notify.sh",
+        "cwd": "scripts",
+        "env": {
+          "COPILOT_HOOK_EVENT": "preToolUse"
+        },
+        "timeoutSec": 10
+      }
+    ],
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "./notify.sh",
+        "cwd": "scripts",
+        "env": {
+          "COPILOT_HOOK_EVENT": "agentStop"
+        },
+        "timeoutSec": 10
+      }
+    ]
+  }
+}
