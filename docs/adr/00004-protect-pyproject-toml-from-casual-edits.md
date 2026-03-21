@@ -1,4 +1,4 @@
-# ADR 00002: Protect pyproject.toml from casual edits
+# ADR 00004: Protect pyproject.toml from casual edits
 
 - Status: accepted
 - Date: 2026-03-21
@@ -22,6 +22,7 @@ AI エージェントにコード修正を任せると、lint や型エラーを
 採用する具体方針は次のとおりです。
 
 - hook は `scripts/protect_config.sh` で実装する
+- hook 設定は通知用の `notifications.json` とは分離し、`.github/hooks/protected_config.json` に置く
 - 既定動作は警告で、`stderr` に「設定ではなくコードを直す」方針を出しつつ処理自体は継続する
 - より厳格にしたい場合は `COPILOT_PROTECTED_CONFIG_POLICY=block` を設定し、hook を失敗させて停止できるようにする
 - 正当なメンテナンス変更を行う場合は、Copilot CLI 起動前に `COPILOT_ALLOW_PYPROJECT_TOML_EDIT=1` を設定して明示的に許可する
@@ -31,6 +32,8 @@ AI エージェントにコード修正を任せると、lint や型エラーを
 ## Consequences
 
 通常のコード修正タスクでは、設定変更で逃げる前にコードを直す方向へエージェントを誘導しやすくなります。
+
+通知用 hook と保護用 hook を別ファイルに分離することで、責務ごとの差分確認と保守がしやすくなります。
 
 完全ブロックではないため、既定設定のままでも保守作業を止めすぎずに済みます。一方で、より厳格な運用をしたい利用者は環境変数だけで block モードへ切り替えられます。
 

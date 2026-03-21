@@ -4,12 +4,6 @@
     "preToolUse": [
       {
         "type": "command",
-        "bash": "./protect_config.sh",
-        "cwd": "scripts",
-        "timeoutSec": 10
-      },
-      {
-        "type": "command",
         "bash": "./notify.sh",
         "cwd": "scripts",
         "env": {
