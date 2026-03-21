@@ -9,7 +9,9 @@ from pathlib import Path
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "protect_config.sh"
 
 
-def run_hook(payload: dict[str, object], **env_overrides: str) -> subprocess.CompletedProcess[str]:
+def run_hook(
+    payload: dict[str, object], **env_overrides: str
+) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env.update(env_overrides)
     return subprocess.run(
@@ -27,7 +29,7 @@ class TestProtectConfigHook:
         result = run_hook(
             {
                 "toolName": "apply_patch",
-                "toolArgs": "*** Begin Patch\n*** Update File: pyproject.toml\n@@\n-deps = []\n+deps = [\"pytest\"]\n*** End Patch\n",
+                "toolArgs": '*** Begin Patch\n*** Update File: pyproject.toml\n@@\n-deps = []\n+deps = ["pytest"]\n*** End Patch\n',
             }
         )
 
@@ -41,7 +43,7 @@ class TestProtectConfigHook:
         result = run_hook(
             {
                 "toolName": "apply_patch",
-                "toolArgs": "*** Begin Patch\n*** Update File: pyproject.toml\n@@\n-deps = []\n+deps = [\"pytest\"]\n*** End Patch\n",
+                "toolArgs": '*** Begin Patch\n*** Update File: pyproject.toml\n@@\n-deps = []\n+deps = ["pytest"]\n*** End Patch\n',
             },
             COPILOT_PROTECTED_CONFIG_POLICY="block",
         )
@@ -49,13 +51,16 @@ class TestProtectConfigHook:
         assert result.returncode == 0
         response = json.loads(result.stdout)
         assert response["permissionDecision"] == "deny"
-        assert "COPILOT_ALLOW_PYPROJECT_TOML_EDIT=1" in response["permissionDecisionReason"]
+        assert (
+            "COPILOT_ALLOW_PYPROJECT_TOML_EDIT=1"
+            in response["permissionDecisionReason"]
+        )
 
     def test_正常系_明示許可があればblockポリシーでも編集できる(self) -> None:
         result = run_hook(
             {
                 "toolName": "apply_patch",
-                "toolArgs": "*** Begin Patch\n*** Update File: pyproject.toml\n@@\n-deps = []\n+deps = [\"pytest\"]\n*** End Patch\n",
+                "toolArgs": '*** Begin Patch\n*** Update File: pyproject.toml\n@@\n-deps = []\n+deps = ["pytest"]\n*** End Patch\n',
             },
             COPILOT_PROTECTED_CONFIG_POLICY="block",
             COPILOT_ALLOW_PYPROJECT_TOML_EDIT="1",
