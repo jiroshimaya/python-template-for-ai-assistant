@@ -18,6 +18,16 @@ sh scripts/setup.sh
 
 `setup.sh` は `uv sync` と `pre-commit` の設定だけを行うので、何回実行しても問題ない想定です。
 
+ローカルで CI 相当の標準チェックを流したい場合は、次を使ってください。
+
+```bash
+uv run task check
+```
+
+`task check` は `uv run pre-commit run --all-files` と `uv run pytest tests` を順に実行します。
+
+これにより、lint / format / 型チェックの対象範囲は CI の lint job とそろい、push 前に CI で落ちる内容をローカルで再現しやすくなります。
+
 このテンプレートは[discus0434/python-template-for-claude-code](https://github.com/discus0434/python-template-for-claude-code)を基に作成されました。
 有益なリポジトリを公開いただき感謝します。
 
