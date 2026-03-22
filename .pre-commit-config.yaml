@@ -30,3 +30,10 @@ repos:
         pass_filenames: false
         files: ^src/
         types: [python]
+      - id: main-sync-pre-push
+        name: main-sync-pre-push
+        entry: bash scripts/pre_push_main_sync.sh
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

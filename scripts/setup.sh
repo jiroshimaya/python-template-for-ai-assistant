@@ -89,6 +89,7 @@ setup_precommit() {
     print_step "Setting up pre-commit hooks..."
 
     uv run pre-commit install --hook-type pre-commit
+    uv run pre-commit install --hook-type pre-push
 
     # Run pre-commit on all files to ensure everything is set up
     print_step "Running initial pre-commit checks..."
