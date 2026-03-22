@@ -19,9 +19,7 @@ class TestPreToolUseMainSync:
         assert result.returncode == 0
         assert result.stdout == ""
 
-    def test_異常系_behind_mainで編集系操作をdenyする(
-        self, tmp_path: Path
-    ) -> None:
+    def test_異常系_behind_mainで編集系操作をdenyする(self, tmp_path: Path) -> None:
         _write_main_sync_state(tmp_path, status="behind_main")
 
         result = _run_pre_hook(
@@ -38,9 +36,7 @@ class TestPreToolUseMainSync:
         assert response["permissionDecision"] == "deny"
         assert "git rebase origin/main" in response["permissionDecisionReason"]
 
-    def test_正常系_behind_mainでも閲覧系操作は許可する(
-        self, tmp_path: Path
-    ) -> None:
+    def test_正常系_behind_mainでも閲覧系操作は許可する(self, tmp_path: Path) -> None:
         _write_main_sync_state(tmp_path, status="behind_main")
 
         result = _run_pre_hook(

@@ -20,9 +20,9 @@ class TestSessionStartMainSync:
 
         assert result.returncode == 0
         state = json.loads(
-            (
-                tmp_path / ".github" / "hooks" / "state" / "main-status.json"
-            ).read_text(encoding="utf-8")
+            (tmp_path / ".github" / "hooks" / "state" / "main-status.json").read_text(
+                encoding="utf-8"
+            )
         )
         assert state["status"] == "up_to_date"
         assert state["headSha"] == "aaaaaaaa"
@@ -47,9 +47,9 @@ class TestSessionStartMainSync:
 
         assert result.returncode == 0
         state = json.loads(
-            (
-                tmp_path / ".github" / "hooks" / "state" / "main-status.json"
-            ).read_text(encoding="utf-8")
+            (tmp_path / ".github" / "hooks" / "state" / "main-status.json").read_text(
+                encoding="utf-8"
+            )
         )
         assert state["status"] == "behind_main"
 
