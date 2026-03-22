@@ -98,7 +98,7 @@ class TestProtectConfigHook:
         result = run_hook(
             {
                 "toolName": "apply_patch",
-                "toolArgs": '*** Begin Patch\n*** Update File: README.md\n@@\n-setup\n+`pyproject.toml` を確認してから setup\n*** End Patch\n',
+                "toolArgs": "*** Begin Patch\n*** Update File: README.md\n@@\n-setup\n+`pyproject.toml` を確認してから setup\n*** End Patch\n",
             }
         )
 
