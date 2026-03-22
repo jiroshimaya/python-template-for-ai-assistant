@@ -15,7 +15,7 @@ build-backend = "hatchling.build"
 source = "vcs"
 
 [tool.ruff]
-include = ["src/**/*.py"]
+include = ["src/**/*.py", "tests/**/*.py", "manual_tests/**/*.py"]
 
 [dependency-groups]
 dev = [
@@ -38,8 +38,6 @@ docs = [
 # =====================
 [tool.taskipy.tasks]
 check = """
-  uv run ruff format &&
-  uv run ruff check --fix &&
-  uv run ty check src &&
+  uv run pre-commit run --all-files &&
   uv run pytest tests
 """
