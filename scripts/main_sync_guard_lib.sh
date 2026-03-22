@@ -101,6 +101,86 @@ is_main_sync_mutating_tool() {
   esac
 }
 
+trim_main_sync_shell_text() {
+  local value="$1"
+
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "$value"
+}
+
+is_main_sync_safe_shell_segment() {
+  local segment
+
+  segment="$(trim_main_sync_shell_text "$1")"
+  if [ -z "$segment" ]; then
+    return 0
+  fi
+
+  case "$segment" in
+    *'|'* | *';'* | *'>'* | *'<'* | *'`'* | *'$('* | *'${'*)
+      return 1
+      ;;
+  esac
+
+  case "$segment" in
+    git\ fetch* | git\ status* | git\ branch* | git\ log* | git\ diff* | git\ rev-parse* | git\ merge-base*)
+      return 0
+      ;;
+    git\ pull*)
+      return 0
+      ;;
+    git\ rebase\ *origin/main* | git\ merge\ *origin/main*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+is_main_sync_allowed_shell_command() {
+  local command="$1"
+  local remaining segment without_double_and
+
+  command="$(trim_main_sync_shell_text "$command")"
+  if [ -z "$command" ]; then
+    return 1
+  fi
+
+  case "$command" in
+    *$'\n'* | *'||'*)
+      return 1
+      ;;
+  esac
+
+  without_double_and="${command//&&/}"
+  case "$without_double_and" in
+    *'&'*)
+      return 1
+      ;;
+  esac
+
+  remaining="$command"
+  while :; do
+    if [[ "$remaining" == *"&&"* ]]; then
+      segment="${remaining%%&&*}"
+      remaining="${remaining#*&&}"
+    else
+      segment="$remaining"
+      remaining=""
+    fi
+
+    if ! is_main_sync_safe_shell_segment "$segment"; then
+      return 1
+    fi
+
+    if [ -z "$remaining" ]; then
+      return 0
+    fi
+  done
+}
+
 main_sync_resolution_message() {
   case "$1" in
     behind_main)

@@ -11,6 +11,14 @@ ensure_main_sync_jq
 input="$(cat)"
 cwd="$(printf '%s' "$input" | jq -r '.cwd // empty')"
 tool_name="$(printf '%s' "$input" | jq -r '.toolName // .tool // empty')"
+tool_args_json="$(printf '%s' "$input" | jq -c '
+  (.toolArgs // .args // {})
+  | if type == "string" then
+      (try fromjson catch .)
+    else
+      .
+    end
+')"
 
 if [ -z "$cwd" ] || [ ! -d "$cwd" ]; then
   echo "main sync guard の実行ディレクトリが不正です: $cwd" >&2
@@ -34,6 +42,20 @@ fi
 
 if ! is_main_sync_mutating_tool "$tool_name"; then
   exit 0
+fi
+
+if [ "$tool_name" = "bash" ]; then
+  shell_command="$(printf '%s' "$tool_args_json" | jq -r '
+    if type == "object" then
+      .command // empty
+    else
+      empty
+    end
+  ')"
+
+  if is_main_sync_allowed_shell_command "$shell_command"; then
+    exit 0
+  fi
 fi
 
 reason="$(main_sync_resolution_message "$status")"
