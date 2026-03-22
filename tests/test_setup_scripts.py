@@ -21,7 +21,9 @@ class TestSetupScripts:
             "run pre-commit run --all-files",
         ]
 
-    def test_正常系_initはプロジェクト名変更後にsetupを実行する(self, tmp_path: Path) -> None:
+    def test_正常系_initはプロジェクト名変更後にsetupを実行する(
+        self, tmp_path: Path
+    ) -> None:
         result, uv_log_path = _run_init_script(
             tmp_path=tmp_path,
             project_name="sample_project",
