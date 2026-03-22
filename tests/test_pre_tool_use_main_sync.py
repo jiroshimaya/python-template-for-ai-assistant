@@ -51,6 +51,55 @@ class TestPreToolUseMainSync:
         assert result.returncode == 0
         assert result.stdout == ""
 
+    def test_正常系_behind_mainでもgit_fetchは許可する(self, tmp_path: Path) -> None:
+        _write_main_sync_state(tmp_path, status="behind_main")
+
+        result = _run_pre_hook(
+            tmp_path=tmp_path,
+            payload={
+                "cwd": str(tmp_path),
+                "toolName": "bash",
+                "toolArgs": json.dumps({"command": "git fetch origin main --quiet"}),
+            },
+        )
+
+        assert result.returncode == 0
+        assert result.stdout == ""
+
+    def test_正常系_behind_mainでもgit_pull_ff_onlyは許可する(
+        self, tmp_path: Path
+    ) -> None:
+        _write_main_sync_state(tmp_path, status="behind_main")
+
+        result = _run_pre_hook(
+            tmp_path=tmp_path,
+            payload={
+                "cwd": str(tmp_path),
+                "toolName": "bash",
+                "toolArgs": json.dumps({"command": "git pull --ff-only"}),
+            },
+        )
+
+        assert result.returncode == 0
+        assert result.stdout == ""
+
+    def test_異常系_behind_mainでは更新系bashをdenyする(self, tmp_path: Path) -> None:
+        _write_main_sync_state(tmp_path, status="behind_main")
+
+        result = _run_pre_hook(
+            tmp_path=tmp_path,
+            payload={
+                "cwd": str(tmp_path),
+                "toolName": "bash",
+                "toolArgs": json.dumps({"command": "python -m pytest"}),
+            },
+        )
+
+        assert result.returncode == 0
+        response = json.loads(result.stdout)
+        assert response["permissionDecision"] == "deny"
+        assert "git rebase origin/main" in response["permissionDecisionReason"]
+
     def test_正常系_ahead_of_mainならbashを許可する(self, tmp_path: Path) -> None:
         _write_main_sync_state(tmp_path, status="ahead_of_main")
 
