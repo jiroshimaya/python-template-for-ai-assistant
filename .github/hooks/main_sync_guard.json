@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "./session_start_main_sync.sh",
+        "cwd": "scripts",
+        "timeoutSec": 15
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "./pre_tool_use_main_sync.sh",
+        "cwd": "scripts",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}
