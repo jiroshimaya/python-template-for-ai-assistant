@@ -1,0 +1,116 @@
+#!/bin/bash
+
+OLD_PROJECT_NAME="python_template_for_ai_assistant"
+PYTHON_VERSION="3.12"
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd -- "$SCRIPT_DIR/.." && pwd)
+DEFAULT_PROJECT_NAME=$(basename "$REPO_ROOT" | tr '[:upper:]' '[:lower:]' | tr '-' '_')
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+print_step() {
+    echo -e "${GREEN}==>${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}Error:${NC} $1" >&2
+}
+
+print_warning() {
+    echo -e "${YELLOW}Warning:${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}✓${NC} $1"
+}
+
+check_uv() {
+    if ! command -v uv &> /dev/null; then
+        print_error "uv is not installed."
+        echo "Install it with: curl -LsSf https://astral.sh/uv/install.sh | sh"
+        exit 1
+    fi
+}
+
+check_github_cli() {
+    if ! command -v gh &> /dev/null; then
+        print_error "gh is not installed."
+        print_step "Install gh"
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            brew install gh
+            gh auth login
+        elif [[ "$OSTYPE" == "linux"* ]]; then
+            type -p curl >/dev/null || sudo apt install curl -y
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+            && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+            && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+            && sudo apt update \
+            && sudo apt install gh -y \
+            && gh auth login
+        fi
+        print_success "gh installed"
+    fi
+}
+
+setup_python() {
+    print_step "Setting up Python environment..."
+    (
+        cd "$REPO_ROOT"
+        uv python pin "$PYTHON_VERSION"
+        print_success "Python $PYTHON_VERSION pinned"
+
+        print_step "Installing dependencies..."
+        uv sync --all-extras
+        print_success "Dependencies installed"
+    )
+}
+
+setup_precommit() {
+    print_step "Setting up pre-commit hooks..."
+    (
+        cd "$REPO_ROOT"
+        uv run pre-commit install --hook-type pre-commit
+        uv run pre-commit install --hook-type pre-push
+
+        print_step "Running initial pre-commit checks..."
+        uv run pre-commit run --all-files || true
+    )
+
+    print_success "Pre-commit hooks installed"
+}
+
+get_project_name() {
+    echo "Repository directory: $REPO_ROOT"
+    echo -n "Enter your project name (default: $DEFAULT_PROJECT_NAME): "
+    read -r PROJECT_NAME
+
+    if [ -z "$PROJECT_NAME" ]; then
+        PROJECT_NAME=$DEFAULT_PROJECT_NAME
+    fi
+
+    if ! echo "$PROJECT_NAME" | grep -qE '^[a-z][a-z0-9_]*$'; then
+        print_error "Invalid project name. Use lowercase letters, numbers, and underscores only."
+        print_error "Must start with a letter."
+        exit 1
+    fi
+
+    echo "Project name: $PROJECT_NAME"
+}
+
+update_project_name() {
+    print_step "Updating project name to '$PROJECT_NAME'..."
+    (
+        cd "$REPO_ROOT"
+        if [ -f "scripts/update_project_name.py" ]; then
+            uv run scripts/update_project_name.py "$PROJECT_NAME" --old-name "$OLD_PROJECT_NAME"
+        else
+            print_error "scripts/update_project_name.py not found."
+            exit 1
+        fi
+    )
+
+    print_success "Project name updated"
+}
