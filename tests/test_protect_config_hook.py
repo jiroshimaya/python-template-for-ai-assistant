@@ -56,6 +56,30 @@ class TestProtectConfigHook:
             in response["permissionDecisionReason"]
         )
 
+    def test_正常系_pyproject削除時に確認付きaskを返す(self) -> None:
+        result = run_hook(
+            {
+                "toolName": "apply_patch",
+                "toolArgs": "*** Begin Patch\n*** Delete File: pyproject.toml\n*** End Patch\n",
+            }
+        )
+
+        assert result.returncode == 0
+        response = json.loads(result.stdout)
+        assert response["permissionDecision"] == "ask"
+
+    def test_正常系_pyproject移動時に確認付きaskを返す(self) -> None:
+        result = run_hook(
+            {
+                "toolName": "apply_patch",
+                "toolArgs": "*** Begin Patch\n*** Update File: pyproject.toml\n*** Move to: pyproject.backup.toml\n@@\n-[project]\n+[project]\n*** End Patch\n",
+            }
+        )
+
+        assert result.returncode == 0
+        response = json.loads(result.stdout)
+        assert response["permissionDecision"] == "ask"
+
     def test_正常系_明示許可があればblockポリシーでも編集できる(self) -> None:
         result = run_hook(
             {
@@ -64,6 +88,36 @@ class TestProtectConfigHook:
             },
             COPILOT_PROTECTED_CONFIG_POLICY="block",
             COPILOT_ALLOW_PYPROJECT_TOML_EDIT="1",
+        )
+
+        assert result.returncode == 0
+        assert result.stdout == ""
+        assert result.stderr == ""
+
+    def test_正常系_readme編集内の単なるpyproject文字列参照は警告しない(self) -> None:
+        result = run_hook(
+            {
+                "toolName": "apply_patch",
+                "toolArgs": "*** Begin Patch\n*** Update File: README.md\n@@\n-setup\n+`pyproject.toml` を確認してから setup\n*** End Patch\n",
+            }
+        )
+
+        assert result.returncode == 0
+        assert result.stdout == ""
+        assert result.stderr == ""
+
+    def test_正常系_editツールで別ファイル内容にpyproject文字列があっても警告しない(
+        self,
+    ) -> None:
+        result = run_hook(
+            {
+                "toolName": "edit",
+                "toolArgs": {
+                    "path": "README.md",
+                    "old_string": "setup",
+                    "new_string": "pyproject.toml を参照する setup",
+                },
+            }
         )
 
         assert result.returncode == 0
