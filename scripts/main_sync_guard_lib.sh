@@ -79,6 +79,61 @@ read_main_sync_status() {
   jq -r '.status // empty' "$state_json_path"
 }
 
+read_main_sync_snapshot() {
+  local state_json_path="$1"
+
+  jq -r '[.status // "", .headSha // "", .originMainSha // "", .mergeBaseSha // ""] | @tsv' "$state_json_path"
+}
+
+refresh_main_sync_state_from_local_refs() {
+  local cwd="$1"
+  local state_json_path="$2"
+  local stored_status stored_head_sha stored_origin_main_sha stored_merge_base_sha
+  local current_head_sha current_origin_main_sha current_merge_base_sha current_status
+
+  IFS=$'\t' read -r \
+    stored_status \
+    stored_head_sha \
+    stored_origin_main_sha \
+    stored_merge_base_sha < <(read_main_sync_snapshot "$state_json_path")
+
+  if ! current_head_sha="$(main_sync_head_sha 2>/dev/null)"; then
+    printf '%s' "$stored_status"
+    return 0
+  fi
+
+  if ! current_origin_main_sha="$(main_sync_origin_main_sha 2>/dev/null)"; then
+    printf '%s' "$stored_status"
+    return 0
+  fi
+
+  if ! current_merge_base_sha="$(main_sync_merge_base_sha 2>/dev/null)"; then
+    printf '%s' "$stored_status"
+    return 0
+  fi
+
+  current_status="$(
+    main_sync_status_from_commits \
+      "$current_head_sha" \
+      "$current_origin_main_sha" \
+      "$current_merge_base_sha"
+  )"
+
+  if [ "$stored_status" != "$current_status" ] ||
+    [ "$stored_head_sha" != "$current_head_sha" ] ||
+    [ "$stored_origin_main_sha" != "$current_origin_main_sha" ] ||
+    [ "$stored_merge_base_sha" != "$current_merge_base_sha" ]; then
+    write_main_sync_state \
+      "$cwd" \
+      "$current_status" \
+      "$current_head_sha" \
+      "$current_origin_main_sha" \
+      "$current_merge_base_sha"
+  fi
+
+  printf '%s' "$current_status"
+}
+
 is_main_sync_blocked_status() {
   case "$1" in
     behind_main | diverged)

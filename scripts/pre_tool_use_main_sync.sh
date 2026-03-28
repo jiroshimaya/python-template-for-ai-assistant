@@ -30,7 +30,8 @@ if [ ! -f "$state_json_path" ]; then
   exit 0
 fi
 
-status="$(read_main_sync_status "$state_json_path")"
+cd "$cwd"
+status="$(refresh_main_sync_state_from_local_refs "$cwd" "$state_json_path")"
 if [ -z "$status" ]; then
   echo "main sync guard の state ファイルに status がありません: $state_json_path" >&2
   exit 1

@@ -18,7 +18,7 @@ Copilot CLI ではセッション開始時点では `main` が最新でも、作
 `main` との同期チェックは次の 3 段構えにする。
 
 - Copilot CLI の `sessionStart` hook で `git fetch origin main --quiet` を行い、`HEAD` / `origin/main` / `merge-base` から同期状態を判定して `.github/hooks/state/main-status.json` に保存する
-- Copilot CLI の `preToolUse` hook では state ファイルだけを読み、`behind_main` または `diverged` のとき編集系ツールと更新系シェル操作を deny する
+- Copilot CLI の `preToolUse` hook では state ファイルと現在のローカル refs を照合し、必要なら state を更新したうえで `behind_main` または `diverged` のとき編集系ツールと更新系シェル操作を deny する
 - ただし `git fetch` や `git pull --ff-only` など、同期解消や状態確認に必要な安全なシェルコマンドは許可する
 - Git の `pre-push` hook では再度 `git fetch origin main --quiet` を行い、`behind_main` または `diverged` のとき push を失敗させる
 
@@ -28,4 +28,4 @@ Git hook の導入は既存運用に合わせて `pre-commit` 経由で行い、
 
 編集開始前に古い `main` を早めに検知しやすくなり、さらに作業中に `main` が進んだケースも push 前に止められる。また、同期解消に必要な `git fetch` / `git pull` 系コマンドまで誤って止めて詰む状況を避けやすくなる。
 
-一方で、`preToolUse` は state ファイルに依存するため、チェックの鮮度は `sessionStart` 時点の fetch に依存する。この制約は `pre-push` の再チェックで補完する。
+一方で、`preToolUse` ではネットワーク越しの fetch は行わないため、`origin/main` の鮮度は `sessionStart` 時点や明示的な `git fetch` に依存する。ただし、同一セッション内で merge/rebase/fetch によってローカル refs が更新された場合は、その場で state も更新される。
