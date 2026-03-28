@@ -117,7 +117,10 @@ if [ ! -f "$state_json_path" ]; then
   exit 0
 fi
 
-mapfile -t unresolved_files < <(jq -r '.unresolvedFiles[]?' "$state_json_path" | unique_lines)
+unresolved_files=()
+while IFS= read -r _line; do
+  unresolved_files+=("$_line")
+done < <(jq -r '.unresolvedFiles[]?' "$state_json_path" | unique_lines)
 if [ "${#unresolved_files[@]}" -eq 0 ]; then
   exit 0
 fi
@@ -131,7 +134,10 @@ esac
 
 case "$tool_name" in
   write | edit | multiEdit | apply_patch)
-    mapfile -t target_files < <(
+    target_files=()
+    while IFS= read -r _line; do
+      target_files+=("$_line")
+    done < <(
       extract_files_from_tool_args "$tool_name" "$tool_args_json" |
         while IFS= read -r file_path; do
           if [ -n "$file_path" ] && [[ "$file_path" == *.py ]]; then
