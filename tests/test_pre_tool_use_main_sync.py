@@ -29,7 +29,7 @@ class TestPreToolUseMainSync:
         state = _read_main_sync_state(tmp_path)
         assert state["status"] == "up_to_date"
 
-    def test_正常系_stateがup_to_dateでもfetch後なら再計算してdenyする(
+    def test_正常系_stateがup_to_dateでもfetch後なら再計算して許可する(
         self, tmp_path: Path
     ) -> None:
         result = _run_pre_hook_with_fake_git(
@@ -46,9 +46,7 @@ class TestPreToolUseMainSync:
         )
 
         assert result.returncode == 0
-        response = json.loads(result.stdout)
-        assert response["permissionDecision"] == "deny"
-        assert "git rebase origin/main" in response["permissionDecisionReason"]
+        assert result.stdout == ""
         state = _read_main_sync_state(tmp_path)
         assert state["status"] == "behind_main"
 
