@@ -127,7 +127,10 @@ if [ -z "$cwd" ] || [ ! -d "$cwd" ]; then
   exit 1
 fi
 
-mapfile -t changed_python_files < <(
+changed_python_files=()
+while IFS= read -r _line; do
+  changed_python_files+=("$_line")
+done < <(
   extract_files_from_tool_args "$tool_name" "$tool_args_json" |
     while IFS= read -r file_path; do
       if [ -n "$file_path" ] && [[ "$file_path" == *.py ]] && [ -f "$cwd/$file_path" ]; then
@@ -148,7 +151,9 @@ mkdir -p "$state_dir"
 
 previous_unresolved_files=()
 if [ -f "$state_json_path" ]; then
-  mapfile -t previous_unresolved_files < <(
+  while IFS= read -r _line; do
+    previous_unresolved_files+=("$_line")
+  done < <(
     jq -r '.unresolvedFiles[]?' "$state_json_path" |
       while IFS= read -r file_path; do
         if [ -n "$file_path" ] && [[ "$file_path" == *.py ]] && [ -f "$cwd/$file_path" ]; then
@@ -158,7 +163,10 @@ if [ -f "$state_json_path" ]; then
   )
 fi
 
-mapfile -t candidate_files < <(
+candidate_files=()
+while IFS= read -r _line; do
+  candidate_files+=("$_line")
+done < <(
   {
     printf '%s\n' "${changed_python_files[@]}"
     printf '%s\n' "${previous_unresolved_files[@]}"
@@ -179,14 +187,20 @@ if ! format_output="$(
   :
 fi
 
-mapfile -t format_fail_files < <(
+format_fail_files=()
+while IFS= read -r _line; do
+  format_fail_files+=("$_line")
+done < <(
   printf '%s\n' "$format_output" |
     sed -n -E 's/^Would reformat: (.+)$/\1/p' |
     unique_lines
 )
 
 if [ "${#format_fail_files[@]}" -eq 0 ] && [ -n "$format_output" ]; then
-  mapfile -t format_fail_files < <(printf '%s\n' "${candidate_files[@]}")
+  format_fail_files=()
+  while IFS= read -r _line; do
+    format_fail_files+=("$_line")
+  done < <(printf '%s\n' "${candidate_files[@]}")
 fi
 
 check_output="[]"
@@ -205,20 +219,29 @@ fi
 check_fail_files=()
 check_summary_lines=()
 if [ "$check_output_is_json" = "1" ]; then
-  mapfile -t check_fail_files < <(
+  while IFS= read -r _line; do
+    check_fail_files+=("$_line")
+  done < <(
     printf '%s' "$check_output" |
       jq -r '.[].filename' |
       unique_lines
   )
-  mapfile -t check_summary_lines < <(
+  while IFS= read -r _line; do
+    check_summary_lines+=("$_line")
+  done < <(
     printf '%s' "$check_output" |
       jq -r '.[] | "- \(.filename):\(.location.row):\(.location.column) [\(.code)] \(.message)"'
   )
 elif [ -n "$check_output" ]; then
-  mapfile -t check_fail_files < <(printf '%s\n' "${candidate_files[@]}")
+  while IFS= read -r _line; do
+    check_fail_files+=("$_line")
+  done < <(printf '%s\n' "${candidate_files[@]}")
 fi
 
-mapfile -t unresolved_files < <(
+unresolved_files=()
+while IFS= read -r _line; do
+  unresolved_files+=("$_line")
+done < <(
   {
     printf '%s\n' "${format_fail_files[@]}"
     printf '%s\n' "${check_fail_files[@]}"
