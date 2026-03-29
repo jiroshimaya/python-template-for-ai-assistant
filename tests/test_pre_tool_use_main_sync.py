@@ -29,7 +29,7 @@ class TestPreToolUseMainSync:
         state = _read_main_sync_state(tmp_path)
         assert state["status"] == "up_to_date"
 
-    def test_正常系_stateがup_to_dateでもfetch後なら再計算してdenyする(
+    def test_正常系_stateがup_to_dateでもfetch後なら再計算して許可する(
         self, tmp_path: Path
     ) -> None:
         result = _run_pre_hook_with_fake_git(
@@ -46,9 +46,7 @@ class TestPreToolUseMainSync:
         )
 
         assert result.returncode == 0
-        response = json.loads(result.stdout)
-        assert response["permissionDecision"] == "deny"
-        assert "git rebase origin/main" in response["permissionDecisionReason"]
+        assert result.stdout == ""
         state = _read_main_sync_state(tmp_path)
         assert state["status"] == "behind_main"
 
@@ -65,15 +63,17 @@ class TestPreToolUseMainSync:
         assert result.returncode == 0
         assert result.stdout == ""
 
-    def test_異常系_behind_mainで編集系操作をdenyする(self, tmp_path: Path) -> None:
+    def test_異常系_behind_mainでeditをdenyする(self, tmp_path: Path) -> None:
         _write_main_sync_state(tmp_path, status="behind_main")
 
         result = _run_pre_hook(
             tmp_path=tmp_path,
             payload={
                 "cwd": str(tmp_path),
-                "toolName": "apply_patch",
-                "toolArgs": "*** Begin Patch\n*** End Patch\n",
+                "toolName": "edit",
+                "toolArgs": json.dumps(
+                    {"path": "README.md", "old_string": "before", "new_string": "after"}
+                ),
             },
         )
 
@@ -97,39 +97,7 @@ class TestPreToolUseMainSync:
         assert result.returncode == 0
         assert result.stdout == ""
 
-    def test_正常系_behind_mainでもgit_fetchは許可する(self, tmp_path: Path) -> None:
-        _write_main_sync_state(tmp_path, status="behind_main")
-
-        result = _run_pre_hook(
-            tmp_path=tmp_path,
-            payload={
-                "cwd": str(tmp_path),
-                "toolName": "bash",
-                "toolArgs": json.dumps({"command": "git fetch origin main --quiet"}),
-            },
-        )
-
-        assert result.returncode == 0
-        assert result.stdout == ""
-
-    def test_正常系_behind_mainでもgit_pull_ff_onlyは許可する(
-        self, tmp_path: Path
-    ) -> None:
-        _write_main_sync_state(tmp_path, status="behind_main")
-
-        result = _run_pre_hook(
-            tmp_path=tmp_path,
-            payload={
-                "cwd": str(tmp_path),
-                "toolName": "bash",
-                "toolArgs": json.dumps({"command": "git pull --ff-only"}),
-            },
-        )
-
-        assert result.returncode == 0
-        assert result.stdout == ""
-
-    def test_異常系_behind_mainでは更新系bashをdenyする(self, tmp_path: Path) -> None:
+    def test_正常系_behind_mainでもbashは許可する(self, tmp_path: Path) -> None:
         _write_main_sync_state(tmp_path, status="behind_main")
 
         result = _run_pre_hook(
@@ -142,9 +110,37 @@ class TestPreToolUseMainSync:
         )
 
         assert result.returncode == 0
-        response = json.loads(result.stdout)
-        assert response["permissionDecision"] == "deny"
-        assert "git rebase origin/main" in response["permissionDecisionReason"]
+        assert result.stdout == ""
+
+    def test_正常系_behind_mainでもtaskは許可する(self, tmp_path: Path) -> None:
+        _write_main_sync_state(tmp_path, status="behind_main")
+
+        result = _run_pre_hook(
+            tmp_path=tmp_path,
+            payload={
+                "cwd": str(tmp_path),
+                "toolName": "task",
+                "toolArgs": json.dumps({"agent_type": "general-purpose"}),
+            },
+        )
+
+        assert result.returncode == 0
+        assert result.stdout == ""
+
+    def test_正常系_behind_mainでもwrite_bashは許可する(self, tmp_path: Path) -> None:
+        _write_main_sync_state(tmp_path, status="behind_main")
+
+        result = _run_pre_hook(
+            tmp_path=tmp_path,
+            payload={
+                "cwd": str(tmp_path),
+                "toolName": "write_bash",
+                "toolArgs": json.dumps({"shellId": "shell-1", "input": "continue"}),
+            },
+        )
+
+        assert result.returncode == 0
+        assert result.stdout == ""
 
     def test_正常系_ahead_of_mainならbashを許可する(self, tmp_path: Path) -> None:
         _write_main_sync_state(tmp_path, status="ahead_of_main")
@@ -161,15 +157,34 @@ class TestPreToolUseMainSync:
         assert result.returncode == 0
         assert result.stdout == ""
 
-    def test_異常系_divergedでも編集系操作をdenyする(self, tmp_path: Path) -> None:
+    def test_異常系_behind_mainでcreateをdenyする(self, tmp_path: Path) -> None:
+        _write_main_sync_state(tmp_path, status="behind_main")
+
+        result = _run_pre_hook(
+            tmp_path=tmp_path,
+            payload={
+                "cwd": str(tmp_path),
+                "toolName": "create",
+                "toolArgs": json.dumps({"path": "new_file.txt", "content": "hello"}),
+            },
+        )
+
+        assert result.returncode == 0
+        response = json.loads(result.stdout)
+        assert response["permissionDecision"] == "deny"
+        assert "git rebase origin/main" in response["permissionDecisionReason"]
+
+    def test_異常系_divergedでもeditをdenyする(self, tmp_path: Path) -> None:
         _write_main_sync_state(tmp_path, status="diverged")
 
         result = _run_pre_hook(
             tmp_path=tmp_path,
             payload={
                 "cwd": str(tmp_path),
-                "toolName": "bash",
-                "toolArgs": json.dumps({"command": "pytest"}),
+                "toolName": "edit",
+                "toolArgs": json.dumps(
+                    {"path": "README.md", "old_string": "before", "new_string": "after"}
+                ),
             },
         )
 
