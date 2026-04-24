@@ -20,9 +20,9 @@ include = ["src/**/*.py", "tests/**/*.py", "manual_tests/**/*.py"]
 [dependency-groups]
 dev = [
     "pytest>=8.0.0",
+    "PyYAML>=6.0.2",
     "ruff>=0.4.0",
     "ty==0.0.24",
-    "pre-commit>=3.7.0",
     "taskipy>=1.14.1",
 ]
 docs = [
@@ -38,6 +38,6 @@ docs = [
 # =====================
 [tool.taskipy.tasks]
 check = """
-  uv run pre-commit run --all-files &&
+  uv run python scripts/git_hook_runner.py pre-commit --all-files &&
   uv run pytest tests
 """

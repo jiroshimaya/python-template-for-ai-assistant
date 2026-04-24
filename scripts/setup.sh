@@ -10,9 +10,10 @@ main() {
     echo "==================================="
     echo
 
+    check_git_version
     check_uv
     setup_python
-    setup_precommit
+    setup_git_hooks
 
     echo
     echo "✨ Setup complete!"

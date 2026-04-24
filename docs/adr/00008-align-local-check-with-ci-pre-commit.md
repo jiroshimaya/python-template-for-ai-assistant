@@ -1,9 +1,9 @@
 # ADR 00008: Align local check command with CI pre-commit
 
-- Status: accepted
+- Status: superseded
 - Date: 2026-03-22
 - Supersedes: none
-- Superseded by: none
+- Superseded by: 00009-adopt-git-254-native-hooks.md
 
 ## Context
 
