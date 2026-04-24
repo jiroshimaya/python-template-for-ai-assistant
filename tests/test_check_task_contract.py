@@ -5,15 +5,17 @@ from pathlib import Path
 
 
 class TestCheckTask:
-    def test_正常系_checkはpre_commitとpytestを順番に実行する(self) -> None:
+    def test_正常系_checkはnative_hook_checkとpytestを順番に実行する(self) -> None:
         pyproject = _load_pyproject()
 
         check_task = pyproject["tool"]["taskipy"]["tasks"]["check"]
 
-        assert "uv run pre-commit run --all-files" in check_task
+        assert (
+            "uv run python scripts/git_hook_runner.py pre-commit --all-files"
+            in check_task
+        )
         assert "uv run pytest tests" in check_task
-        assert "uv run ruff format" not in check_task
-        assert "uv run ruff check --fix" not in check_task
+        assert "uv run pre-commit run --all-files" not in check_task
 
 
 class TestRuffInclude:

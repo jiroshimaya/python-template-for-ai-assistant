@@ -22,7 +22,7 @@ Copilot CLI ではセッション開始時点では `main` が最新でも、作
 - ただし `git fetch` や `git pull --ff-only` など、同期解消や状態確認に必要な安全なシェルコマンドは許可する
 - Git の `pre-push` hook では再度 `git fetch origin main --quiet` を行い、`behind_main` または `diverged` のとき push を失敗させる
 
-Git hook の導入は既存運用に合わせて `pre-commit` 経由で行い、`scripts/setup.sh` で `pre-commit` と `pre-push` の両方を install する。
+Git hook の導入は Git 2.54 の config-based hooks で行い、`scripts/setup.sh` で `pre-commit` 相当と `pre-push` を設定する。
 
 ## Consequences
 

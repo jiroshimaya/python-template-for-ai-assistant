@@ -1,9 +1,9 @@
 # ADR 00005: Switch local hooks to pre-commit
 
-- Status: accepted
+- Status: superseded
 - Date: 2026-03-21
 - Supersedes: none
-- Superseded by: none
+- Superseded by: 00009-adopt-git-254-native-hooks.md
 
 ## Context
 

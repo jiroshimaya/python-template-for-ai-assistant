@@ -9,7 +9,7 @@
 
 このテンプレートは AI アシスタント、とくに Copilot CLI との協働を前提にしています。
 
-型チェック系の実行経路としては、`pyproject.toml` の `check` タスク、`.pre-commit-config.yaml` のローカル hook、CI の `uv run pre-commit run --all-files` が使われています。
+型チェック系の実行経路としては、`pyproject.toml` の `check` タスク、ローカルの native Git hook、CI の `uv run python scripts/git_hook_runner.py pre-commit --all-files` が使われています。
 
 `pyright` を使い続ける案もありましたが、このテンプレートでは AI エージェントがローカルで何度もチェックを回す前提があるため、実行時間の短さをより重視しました。主な判断理由は、型チェックをより高速に回せる構成へ寄せることです。
 
@@ -30,8 +30,8 @@
 
 - 依存関係は `pyproject.toml` の `dev` グループで `ty==0.0.24` を利用する
 - ローカルの標準コマンドは `uv run ty check src` とする
-- pre-commit hook も `uv run ty check src` を使い、`pass_filenames: false` を設定して明示的に `src` を対象にする
-- CI は追加の暫定インストールを行わず、`uv sync --all-extras` と pre-commit 実行だけで再現できる状態を維持する
+- native Git hook でも `uv run ty check src` を使い、`src` を明示的に対象にする
+- CI は追加の暫定インストールを行わず、`uv sync --all-extras` と native hook 相当チェックだけで再現できる状態を維持する
 - 今後この判断を見直す場合は、新しい ADR を追加し、この ADR を supersede する
 
 ## Consequences

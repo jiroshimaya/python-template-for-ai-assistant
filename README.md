@@ -10,13 +10,13 @@ sh scripts/init.sh
 
 `init.sh` はプロジェクト名の置換も行うため、基本的に初回のみ実行します。
 
-その後、別マシンや別 worktree で clone したときなど、依存関係の同期と `pre-commit` の再設定だけを行いたい場合は次を使ってください。
+その後、別マシンや別 worktree で clone したときなど、依存関係の同期と Git hook の再設定だけを行いたい場合は次を使ってください。
 
 ```bash
 sh scripts/setup.sh
 ```
 
-`setup.sh` は `uv sync` と `pre-commit` の設定だけを行うので、何回実行しても問題ない想定です。
+`setup.sh` は `uv sync` と Git hook の設定だけを行うので、何回実行しても問題ない想定です。Git 2.54 以上を前提にしており、ローカル hook は `pre-commit` ではなく Git 標準の config-based hooks で設定されます。
 
 このテンプレートは[discus0434/python-template-for-claude-code](https://github.com/discus0434/python-template-for-claude-code)を基に作成されました。
 有益なリポジトリを公開いただき感謝します。
